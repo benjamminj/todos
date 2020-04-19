@@ -6,6 +6,9 @@ import React, {
 } from 'react'
 import { GetServerSideProps } from 'next'
 import { jsx, InterpolationWithTheme } from '@emotion/core'
+import { ListService } from '../../modules/lists/list.service'
+import { List } from '../../modules/lists/types'
+import { PlusIcon } from '../../components/PlusIcon'
 /** @jsx jsx */ jsx
 
 //------------------------------------------------------------------------------
@@ -25,6 +28,175 @@ const spacing = {
   xxlarge: 96,
 }
 type SpacingToken = keyof typeof spacing
+
+const fontConfig = {
+  baseRows: 4,
+  // TODO: better way to store values?
+  primary:
+    '-apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, sans-serif',
+  secondary: `"Palatino Linotype", Palatino, Palladio, "URW Palladio L", "Book Antiqua", Baskerville, "Bookman Old Style", "Bitstream Charter", "Nimbus Roman No9 L", Garamond, "Apple Garamond", "ITC Garamond Narrow", "New Century Schoolbook", "Century Schoolbook", "Century Schoolbook L", Georgia, serif`,
+}
+
+interface Variant {
+  scale: number
+  weight: {
+    regular: 'bold' | 'lighter' | 'normal'
+    bold: 'bold' | 'lighter' | 'normal'
+  }
+  letterSpacing: number
+  font: 'secondary' | 'primary'
+  lineHeight: number
+  transform: 'none' | 'uppercase' | 'lowercase'
+}
+
+type FontVariantToken =
+  | 'h1'
+  | 'h2'
+  | 'h3'
+  | 'h4'
+  | 'h5'
+  | 'h6'
+  | 'subtitle'
+  | 'overline'
+  | 'body'
+  | 'body2'
+  | 'button'
+  | 'caption'
+
+const fontVariants: { [key in FontVariantToken]: Variant } = {
+  h1: {
+    scale: 4,
+    weight: {
+      regular: 'bold',
+      bold: 'bold',
+    },
+    letterSpacing: -0.06,
+    font: 'secondary',
+    lineHeight: 1,
+    transform: 'none',
+  },
+  h2: {
+    scale: 3,
+    weight: {
+      regular: 'bold',
+      bold: 'bold',
+    },
+    letterSpacing: -0.06,
+    font: 'secondary',
+    lineHeight: 1,
+    transform: 'none',
+  },
+  h3: {
+    scale: 2.5,
+    weight: {
+      regular: 'bold',
+      bold: 'bold',
+    },
+    letterSpacing: -0.06,
+    font: 'secondary',
+    lineHeight: 1,
+    transform: 'none',
+  },
+  h4: {
+    scale: 2,
+    weight: {
+      regular: 'bold',
+      bold: 'bold',
+    },
+    letterSpacing: -0.06,
+    font: 'secondary',
+    lineHeight: 1,
+    transform: 'none',
+  },
+  h5: {
+    scale: 1.5,
+    weight: {
+      regular: 'bold',
+      bold: 'bold',
+    },
+    letterSpacing: -0.06,
+    font: 'secondary',
+    lineHeight: 1,
+    transform: 'none',
+  },
+  h6: {
+    scale: 1.25,
+    weight: {
+      regular: 'bold',
+      bold: 'bold',
+    },
+    letterSpacing: -0.06,
+    font: 'secondary',
+    lineHeight: 1,
+    transform: 'none',
+  },
+  subtitle: {
+    scale: 1.25,
+    weight: {
+      regular: 'normal',
+      bold: 'bold',
+    },
+    letterSpacing: 0,
+    font: 'primary',
+    lineHeight: 1.25,
+    transform: 'none',
+  },
+  overline: {
+    scale: 0.75,
+    weight: {
+      regular: 'normal',
+      bold: 'bold',
+    },
+    letterSpacing: 0,
+    font: 'secondary',
+    lineHeight: 1,
+    transform: 'none',
+  },
+  body: {
+    scale: 1,
+    weight: {
+      regular: 'normal',
+      bold: 'bold',
+    },
+    letterSpacing: 0,
+    font: 'primary',
+    lineHeight: 1.5,
+    transform: 'none',
+  },
+  body2: {
+    scale: 0.75,
+    weight: {
+      regular: 'normal',
+      bold: 'bold',
+    },
+    letterSpacing: 0,
+    font: 'primary',
+    lineHeight: 1.25,
+    transform: 'none',
+  },
+  button: {
+    scale: 1,
+    weight: {
+      regular: 'bold',
+      bold: 'bold',
+    },
+    letterSpacing: 0,
+    font: 'primary',
+    lineHeight: 1.5,
+    transform: 'uppercase',
+  },
+  caption: {
+    scale: 0.5,
+    weight: {
+      regular: 'normal',
+      bold: 'bold',
+    },
+    letterSpacing: 0,
+    font: 'primary',
+    lineHeight: 1.75,
+    transform: 'none',
+  },
+}
 
 //------------------------------------------------------------------------------
 // Layout Components
@@ -170,13 +342,27 @@ const Card: FunctionComponent<CardProps> = ({ children, ...props }) => {
 
 // TODO: pull in my text component from @benjamminj/components?
 // TODO: font scale?
-interface TextProps extends HtmlElementProps<HTMLSpanElement> {}
-const Text: FunctionComponent<TextProps> = ({ children, ...props }) => {
+interface TextProps extends HtmlElementProps<HTMLSpanElement> {
+  variant?: FontVariantToken
+  bold?: boolean
+}
+const Text: FunctionComponent<TextProps> = ({
+  children,
+  variant = 'body',
+  bold = false,
+  ...props
+}) => {
+  const { lineHeight, font, scale, weight } = fontVariants[variant]
+
   return (
     <span
       {...props}
       css={{
         display: 'block',
+        fontFamily: fontConfig[font],
+        fontWeight: bold ? weight.bold : weight.regular,
+        fontSize: scale * fontConfig.baseRows * spacing.xxsmall,
+        lineHeight,
       }}
     >
       {children}
@@ -189,39 +375,64 @@ const Text: FunctionComponent<TextProps> = ({ children, ...props }) => {
 //------------------------------------------------------------------------------
 interface Props {
   name: string
+  lists: List[]
 }
 
 /**
  * Groups of lists
  */
-export const ListGroupsPage: FunctionComponent<Props> = ({ name }) => {
+export const ListGroupsPage: FunctionComponent<Props> = ({ lists }) => {
   return (
-    <>
-      <Columns paddingY="large" paddingX="small">
-        <Column>Lists</Column>
-
-        <Column width="content">
-          <Box paddingX="small">+</Box>
+    <Box css={{ backgroundColor: '#fafafa', minHeight: '100vh' }}>
+      <Columns paddingY="large" paddingX="small" css={{ alignItems: 'center' }}>
+        <Column>
+          <Text variant="h6">Lists</Text>
         </Column>
 
         <Column width="content">
-          <Box paddingX="small">o</Box>
+          <Box
+            css={{
+              width: spacing.large,
+              height: spacing.large,
+              borderRadius: spacing.large / 2,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 0 4px rgba(0,0,0,0.2)',
+              backgroundColor: 'white',
+            }}
+          >
+            <button
+              css={{
+                margin: 0,
+                padding: 0,
+                height: '100%',
+                width: '100%',
+                color: '#494949',
+              }}
+              onClick={() => console.log('🔥')}
+            >
+              <PlusIcon
+                width={spacing.medium * 1.25}
+                height={spacing.medium * 1.25}
+              />
+              {/* Visually hidden text "Add a list" */}
+            </button>
+          </Box>
         </Column>
       </Columns>
 
-      <Box padding="small" paddingTop="large">
+      <Box padding="small">
         <Stack space="small">
           {/* TODO: inline or "columns" component */}
 
-          {[
-            ['#f0b8ba', 12],
-            ['#b8cdf0', 0],
-            ['#b8f0d2', 9],
-          ].map(([hex, num], i) => (
-            <Card key={i} css={{ backgroundColor: hex as string }}>
+          {lists.map((list) => (
+            <Card key={list.id} css={{ backgroundColor: '#fff' }}>
               <Columns css={{ alignItems: 'center' }}>
                 <Column>
-                  <Text css={{ fontSize: 24 }}>List #{i + 1}</Text>
+                  <Text bold variant="subtitle">
+                    {list.name}
+                  </Text>
                 </Column>
                 <Column width="content">
                   <Box
@@ -229,13 +440,13 @@ export const ListGroupsPage: FunctionComponent<Props> = ({ name }) => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      borderRadius: spacing.xlarge / 2,
-                      height: spacing.xlarge,
-                      width: spacing.xlarge,
+                      borderRadius: spacing.large / 2,
+                      height: spacing.large,
+                      width: spacing.large,
                       background: `rgba(0, 0, 0, 0.1)`,
                     }}
                   >
-                    <Text css={{ fontSize: 16 }}>{num}</Text>
+                    <Text variant="body">{list.itemIds.length}</Text>
                   </Box>
                 </Column>
               </Columns>
@@ -243,14 +454,17 @@ export const ListGroupsPage: FunctionComponent<Props> = ({ name }) => {
           ))}
         </Stack>
       </Box>
-    </>
+    </Box>
   )
 }
 
 export const getServerSideProps: GetServerSideProps<Props> = async () => {
+  const lists = ListService.getAllLists()
+
   return {
     props: {
       name: 'test',
+      lists,
     },
   }
 }
