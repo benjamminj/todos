@@ -11,6 +11,7 @@ import { Text } from '../../components/Text'
 import { ListService } from '../../modules/lists/list.service'
 import { List } from '../../modules/lists/types'
 import { spacing } from '../../styles/spacing'
+import Link from 'next/link'
 /** @jsx jsx */ jsx
 
 interface Props {
@@ -67,30 +68,34 @@ export const ListGroupsPage: FunctionComponent<Props> = ({ lists }) => {
       <Box padding="small">
         <Stack space="small">
           {lists.map((list) => (
-            <Card key={list.id} css={{ backgroundColor: '#fff' }}>
-              <Columns css={{ alignItems: 'center' }}>
-                <Column>
-                  <Text bold variant="subtitle">
-                    {list.name}
-                  </Text>
-                </Column>
-                <Column width="content">
-                  <Box
-                    css={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: spacing.large / 2,
-                      height: spacing.large,
-                      width: spacing.large,
-                      background: `rgba(0, 0, 0, 0.1)`,
-                    }}
-                  >
-                    <Text variant="body">{list.itemIds.length}</Text>
-                  </Box>
-                </Column>
-              </Columns>
-            </Card>
+            <Link key={list.id} href="/lists/[listId]" as={`/lists/${list.id}`}>
+              <a>
+                <Card css={{ backgroundColor: '#fff' }}>
+                  <Columns css={{ alignItems: 'center' }}>
+                    <Column>
+                      <Text bold variant="subtitle">
+                        {list.name}
+                      </Text>
+                    </Column>
+                    <Column width="content">
+                      <Box
+                        css={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: spacing.large / 2,
+                          height: spacing.large,
+                          width: spacing.large,
+                          background: `rgba(0, 0, 0, 0.1)`,
+                        }}
+                      >
+                        <Text variant="body">{list.itemIds.length}</Text>
+                      </Box>
+                    </Column>
+                  </Columns>
+                </Card>
+              </a>
+            </Link>
           ))}
         </Stack>
       </Box>

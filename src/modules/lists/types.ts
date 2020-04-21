@@ -16,6 +16,7 @@ export interface List {
   // TODO: union type for possible schemes
   colorScheme: ListColorScheme
   itemIds: string[]
+  items?: ListItem[]
 }
 
 export interface ListItem {

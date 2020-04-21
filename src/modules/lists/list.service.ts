@@ -1,4 +1,4 @@
-import { getMockLists } from './__mocks__/list.data'
+import { getMockLists, getMockListItems } from './__mocks__/list.data'
 import { List, ListColorScheme } from './types'
 import { generateId } from '../../utils/generateId'
 
@@ -9,11 +9,24 @@ export class ListService {
     return Object.values(getMockLists())
   }
 
-  static getListById(id: string) {
+  static getListById(id: string, params: { expand?: 'items' } = {}) {
     const lists = getMockLists()
     const list = lists[id]
 
     if (!list) throw NotFoundError
+
+    if (params.expand === 'items') {
+      const items = getMockListItems()
+
+      const attachedItems = list.itemIds
+        .map((itemId) => items[itemId])
+        .filter((item) => item)
+
+      return {
+        ...list,
+        items: attachedItems,
+      }
+    }
 
     return list
   }

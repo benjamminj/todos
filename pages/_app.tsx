@@ -17,6 +17,11 @@ export default class App extends NextApp {
               fontSize: 20,
               margin: 0,
             },
+            a: {
+              textDecoration: 'none',
+              color: 'inherit',
+              fontSize: 'inherit',
+            },
           }}
         />
         <Component {...pageProps} />

@@ -1,5 +1,7 @@
 import { BoxProps, Box } from '../Box'
 import { ReactNode, FunctionComponent } from 'react'
+import { jsx } from '@emotion/core'
+/** @jsx jsx */ jsx
 
 export interface ColumnProps extends BoxProps {
   children: ReactNode

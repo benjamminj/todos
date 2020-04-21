@@ -2,6 +2,8 @@ import { FunctionComponent } from 'react'
 import { HtmlElementProps } from '../../types/HtmlElementProps'
 import { FontVariantToken, fontVariants, fontConfig } from '../../styles/fonts'
 import { spacing } from '../../styles/spacing'
+import { jsx } from '@emotion/core'
+/** @jsx jsx */ jsx
 
 export interface TextProps extends HtmlElementProps<HTMLSpanElement> {
   variant?: FontVariantToken

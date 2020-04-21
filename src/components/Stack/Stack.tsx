@@ -1,8 +1,8 @@
 import { ReactNode, FunctionComponent, Children } from 'react'
 import { SpacingToken } from '../../styles/spacing'
-import { Box } from '../Box'
+import { Box, BoxProps } from '../Box'
 
-export interface StackProps {
+export interface StackProps extends BoxProps {
   children: ReactNode
   space?: SpacingToken
 }

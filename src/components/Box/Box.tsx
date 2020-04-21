@@ -5,7 +5,7 @@ import { SpacingToken, spacing } from '../../styles/spacing'
 /** @jsx jsx */ jsx
 
 export interface BoxProps extends HtmlElementProps<HTMLDivElement> {
-  children: ReactNode
+  children?: ReactNode
   padding?: SpacingToken
   paddingY?: SpacingToken
   paddingX?: SpacingToken
