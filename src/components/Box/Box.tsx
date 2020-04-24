@@ -1,10 +1,11 @@
-import React, { FunctionComponent, ReactNode } from 'react'
+import React, { FunctionComponent, ReactNode, createElement } from 'react'
 import { jsx, InterpolationWithTheme } from '@emotion/core'
 import { HtmlElementProps } from '../../types/HtmlElementProps'
 import { SpacingToken, spacing } from '../../styles/spacing'
 /** @jsx jsx */ jsx
 
-export interface BoxProps extends HtmlElementProps<HTMLDivElement> {
+export interface BoxProps<TagName extends keyof HTMLElementTagNameMap = 'div'>
+  extends HtmlElementProps<HTMLElementTagNameMap[TagName]> {
   children?: ReactNode
   padding?: SpacingToken
   paddingY?: SpacingToken
@@ -13,9 +14,10 @@ export interface BoxProps extends HtmlElementProps<HTMLDivElement> {
   paddingBottom?: SpacingToken
   paddingLeft?: SpacingToken
   paddingRight?: SpacingToken
+  as?: TagName
 }
 
-export const Box: FunctionComponent<BoxProps> = ({
+export const Box = <TagName extends keyof HTMLElementTagNameMap>({
   children,
   padding = 'none',
   paddingY,
@@ -24,8 +26,9 @@ export const Box: FunctionComponent<BoxProps> = ({
   paddingBottom,
   paddingLeft,
   paddingRight,
+  as = 'div' as TagName,
   ...props
-}) => {
+}: BoxProps<TagName>) => {
   const getPaddingRules = () => {
     const paddingRules: InterpolationWithTheme<unknown> = {
       padding: spacing[padding],
@@ -51,9 +54,15 @@ export const Box: FunctionComponent<BoxProps> = ({
     return paddingRules
   }
 
-  return (
-    <div {...props} css={getPaddingRules()}>
-      {children}
-    </div>
+  return jsx(
+    as,
+    {
+      ...props,
+      css: getPaddingRules(),
+    },
+    children
   )
+  // <div {...props} css={}>
+  //   {children}
+  // </div>
 }

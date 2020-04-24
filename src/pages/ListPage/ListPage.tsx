@@ -12,6 +12,7 @@ import { spacing } from '../../styles/spacing'
 import { PlusIcon } from '../../components/PlusIcon'
 import Link from 'next/link'
 import { EditIcon } from '../../components/EditIcon'
+import { Input } from '../../components/Input'
 /** @jsx jsx */ jsx
 
 interface ListPageProps {
@@ -33,7 +34,8 @@ export const ListPage: FunctionComponent<ListPageProps> = ({ list }) => {
       </Columns>
 
       <Box padding="small">
-        <Box
+        <Input label="add an item" placeholder="TESTs" elevation="inset" />
+        {/* <Box
           padding="medium"
           css={{
             backgroundColor: '#eaeaea',
@@ -55,7 +57,7 @@ export const ListPage: FunctionComponent<ListPageProps> = ({ list }) => {
               />
             </Column>
           </Columns>
-        </Box>
+        </Box> */}
 
         <Box paddingTop="medium">
           <Stack space="xsmall">

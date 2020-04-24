@@ -52,6 +52,8 @@ export const ListGroupsPage: FunctionComponent<Props> = ({ lists }) => {
                 height: '100%',
                 width: '100%',
                 color: '#494949',
+                background: 'transparent',
+                border: 'none',
               }}
               onClick={() => console.log('🔥')}
             >
