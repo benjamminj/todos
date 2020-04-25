@@ -13,6 +13,8 @@ import { PlusIcon } from '../../components/PlusIcon'
 import Link from 'next/link'
 import { EditIcon } from '../../components/EditIcon'
 import { Input } from '../../components/Input'
+import { Fab } from '../../components/Fab/Fab'
+import { ListItem } from './components/ListItem'
 /** @jsx jsx */ jsx
 
 interface ListPageProps {
@@ -34,61 +36,27 @@ export const ListPage: FunctionComponent<ListPageProps> = ({ list }) => {
       </Columns>
 
       <Box padding="small">
-        <Input label="add an item" placeholder="TESTs" elevation="inset" />
-        {/* <Box
-          padding="medium"
-          css={{
-            backgroundColor: '#eaeaea',
-            borderRadius: 8,
-            // border: '2px solid #ccc',
-          }}
-        >
-          <Columns css={{ alignItems: 'center' }}>
-            <Column>input fpo</Column>
-            <Column
-              width="content"
-              css={{ display: 'flex', alignItems: 'center' }}
-            >
-              <PlusIcon
-                css={{
-                  height: spacing.medium,
-                  width: spacing.medium,
-                }}
-              />
-            </Column>
-          </Columns>
-        </Box> */}
+        <Box css={{ position: 'relative' }}>
+          <Input label="add an item" placeholder="TESTS" elevation="inset" />
+          <Fab
+            label="Add"
+            css={{
+              position: 'absolute',
+              top: '50%',
+              right: spacing.small,
+              transform: 'translateY(-50%)',
+            }}
+          >
+            <PlusIcon />
+          </Fab>
+        </Box>
 
         <Box paddingTop="medium">
           <Stack space="xsmall">
             {/* TODO: input component */}
 
             {list.items?.map((item) => (
-              <Card
-                key={item.id}
-                css={{
-                  backgroundColor: '#fff',
-                  borderRadius: 8,
-                  border: '1px solid #eaeaea',
-                }}
-              >
-                <Columns css={{ alignItems: 'center' }}>
-                  <Column width="content" paddingRight="small">
-                    <Box
-                      css={{
-                        width: spacing.large,
-                        height: spacing.large,
-                        borderRadius: 8,
-                        backgroundColor: '#eaeaea',
-                      }}
-                    />
-                  </Column>
-                  <Column>{item.name}</Column>
-                  <Column width="content" css={{ display: 'flex' }}>
-                    <EditIcon css={{ fill: '#999' }} />
-                  </Column>
-                </Columns>
-              </Card>
+              <ListItem name={item.name} key={item.id} />
             ))}
           </Stack>
         </Box>

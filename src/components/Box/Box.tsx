@@ -1,4 +1,4 @@
-import React, { FunctionComponent, ReactNode, createElement } from 'react'
+import { ReactNode } from 'react'
 import { jsx, InterpolationWithTheme } from '@emotion/core'
 import { HtmlElementProps } from '../../types/HtmlElementProps'
 import { SpacingToken, spacing } from '../../styles/spacing'

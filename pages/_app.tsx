@@ -4,6 +4,8 @@ import { CacheProvider, Global } from '@emotion/core'
 
 // Use only { cache } from 'emotion'. Don't use { css }.
 import { cache } from 'emotion'
+import { spacing } from '../src/styles/spacing'
+import { fontVariants, fontConfig } from '../src/styles/fonts'
 
 export default class App extends NextApp {
   render() {
@@ -14,7 +16,8 @@ export default class App extends NextApp {
           styles={{
             body: {
               fontFamily: 'sans-serif',
-              fontSize: 20,
+              fontSize:
+                fontVariants.body.scale * fontConfig.baseRows * spacing.xxsmall,
               margin: 0,
             },
             a: {
