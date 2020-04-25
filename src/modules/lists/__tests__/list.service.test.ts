@@ -1,6 +1,10 @@
-import { generateMockLists, getMockLists } from '../__mocks__/list.data'
+import {
+  generateMockLists,
+  getMockLists,
+  getMockListItems,
+} from '../__mocks__/list.data'
 import { ListService } from '../list.service'
-import { ListColorScheme } from '../types'
+import { ListColorScheme, ListItem } from '../types'
 
 describe('ListService', () => {
   beforeEach(() => {
@@ -130,5 +134,100 @@ describe('ListService', () => {
         name: 'Things',
       },
     ])
+  })
+
+  describe('#createNewListItem', () => {
+    test('should allow you to create a new item in a list', () => {
+      const itemDto = { name: 'Joe' }
+      const listId = 'b9y7rp6wt'
+
+      const newItem = ListService.createNewListItem(listId, itemDto)
+
+      expect(newItem).toMatchObject({
+        description: null,
+        listId: 'b9y7rp6wt',
+        name: 'Joe',
+        status: 'todo',
+      })
+
+      expect(ListService.getListById(listId).itemIds).toContain(newItem.id)
+    })
+
+    test('should throw an error if creating a list item without a name', () => {
+      const listId = 'b9y7rp6wt'
+
+      // @ts-ignore
+      expect(() => ListService.createNewListItem(listId, {})).toThrow()
+      expect(() =>
+        ListService.createNewListItem(listId, { name: '' })
+      ).toThrow()
+    })
+
+    test('should throw an error if creating a list item in a nonexistent list', () => {
+      const itemDto = { name: 'Joe' }
+      const listId = 'potato'
+
+      expect(() => ListService.createNewListItem(listId, itemDto)).toThrow()
+    })
+  })
+
+  describe('#updateListItem', () => {
+    test('should update the item', () => {
+      const itemId = '0l28pul1z'
+      const updateDto = {
+        name: 'Joe',
+        status: 'completed' as ListItem['status'],
+      }
+
+      const updated = ListService.updateListItem(itemId, updateDto)
+
+      const items = getMockListItems()
+      const item = items[itemId]
+
+      expect(item.name).toEqual('Joe')
+      expect(item.status).toEqual('completed')
+      expect(updated).toEqual(item)
+    })
+
+    test('should throw an error if the item does not exist', () => {
+      const itemId = 'potato'
+      const updateDto = {
+        name: 'Joe',
+        status: 'completed' as ListItem['status'],
+      }
+
+      expect(() => ListService.updateListItem(itemId, updateDto)).toThrow()
+    })
+
+    test('should throw an error if a falsy name is added', () => {
+      const itemId = '0l28pul1z'
+      expect(() =>
+        ListService.updateListItem(itemId, {
+          // @ts-ignore
+          name: null,
+        })
+      ).toThrow()
+
+      expect(() =>
+        ListService.updateListItem(itemId, {
+          // @ts-ignore
+          name: undefined,
+        })
+      ).toThrow()
+
+      expect(() => ListService.updateListItem(itemId, { name: '' })).toThrow()
+    })
+
+    test('should throw an error if a non-valid status is applied', () => {
+      const itemId = '0l28pul1z'
+      expect(() =>
+        // @ts-ignore
+        ListService.updateListItem(itemId, { status: 'potato' })
+      ).toThrow()
+      expect(() =>
+        // @ts-ignore
+        ListService.updateListItem(itemId, { status: false })
+      ).toThrow()
+    })
   })
 })

@@ -1,8 +1,9 @@
 import { getMockLists, getMockListItems } from './__mocks__/list.data'
-import { List, ListColorScheme } from './types'
+import { List, ListColorScheme, ListItem } from './types'
 import { generateId } from '../../utils/generateId'
 
 const NotFoundError = new Error('Not found')
+const InvalidInputError = new Error('Invalid input')
 
 export class ListService {
   static getAllLists() {
@@ -70,5 +71,55 @@ export class ListService {
 
     delete lists[id]
     return list
+  }
+
+  static createNewListItem(
+    listId: string,
+    item: { name: ListItem['name']; status?: ListItem['status'] }
+  ) {
+    const id = generateId()
+    const listItems = getMockListItems()
+    const lists = getMockLists()
+
+    const list = lists[listId]
+
+    if (!list) throw NotFoundError
+    if (!item.name) throw InvalidInputError
+
+    const newItem: ListItem = {
+      id,
+      listId,
+      description: null,
+      status: 'todo',
+      ...item,
+    }
+
+    listItems[id] = newItem
+    list.itemIds.push(id)
+
+    return newItem
+  }
+
+  static updateListItem(
+    itemId: string,
+    updates: Partial<Pick<ListItem, 'name' | 'status'>>
+  ) {
+    const listItems = getMockListItems()
+    const item = listItems[itemId]
+
+    const hasNameError = 'name' in updates && !updates.name
+    const hasStatusError =
+      'status' in updates &&
+      ['todo', 'completed'].includes(updates.status as string) === false
+
+    if (hasNameError || hasStatusError) throw InvalidInputError
+    if (!item) throw NotFoundError
+
+    listItems[itemId] = {
+      ...item,
+      ...updates,
+    }
+
+    return listItems[itemId]
   }
 }
