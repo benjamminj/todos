@@ -75,9 +75,7 @@ export const ListGroupsPage: FunctionComponent<Props> = ({ lists }) => {
                 <Card css={{ backgroundColor: '#fff' }}>
                   <Columns css={{ alignItems: 'center' }}>
                     <Column>
-                      <Text bold variant="subtitle">
-                        {list.name}
-                      </Text>
+                      <Text variant="subtitle">{list.name}</Text>
                     </Column>
                     <Column width="content">
                       <Box
