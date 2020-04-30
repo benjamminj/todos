@@ -11,15 +11,23 @@ import { Input } from '../../../components/Input'
 import { Text } from '../../../components/Text'
 import { CloseIcon } from '../../../components/CloseIcon'
 import { ListService } from '../../../modules/lists/list.service'
+import { useMutation } from 'rhdf'
+import { List } from '../../../modules/lists/types'
 /** @jsx jsx */ jsx
 
 export interface ListItemProps {
   name: string
   id: string
+  listId: string
 }
 
-export const ListItem: FunctionComponent<ListItemProps> = ({ name, id }) => {
+export const ListItem: FunctionComponent<ListItemProps> = ({
+  name,
+  id,
+  listId,
+}) => {
   const [editing, setEditing] = useState(false)
+  const { mutate } = useMutation<Required<List> | undefined>(`/lists/${listId}`)
 
   return (
     <Card
@@ -54,9 +62,22 @@ export const ListItem: FunctionComponent<ListItemProps> = ({ name, id }) => {
               defaultValue={name}
               label="Name"
               onBlur={(ev) => {
-                ListService.updateListItem(id, {
-                  name: ev.target.value,
+                mutate(async (prevList) => {
+                  if (!prevList) return
+
+                  const updatedItem = await ListService.updateListItem(id, {
+                    name: ev.target.value,
+                  })
+
+                  return {
+                    ...prevList,
+                    items:
+                      prevList.items.map((item) =>
+                        item.id === updatedItem.id ? updatedItem : item
+                      ) || [],
+                  }
                 })
+
                 setEditing(false)
               }}
             />

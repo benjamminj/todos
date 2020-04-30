@@ -4,7 +4,9 @@ import { ListItem } from '../ListItem'
 
 describe('<ListItem />', () => {
   test('should render the list item', () => {
-    const { getByText } = render(<ListItem name="Test" id="potato" />)
+    const { getByText } = render(
+      <ListItem name="Test" id="potato" listId="b9y7rp6wt" />
+    )
     expect(getByText('Test')).toBeInTheDocument()
   })
 
@@ -12,7 +14,7 @@ describe('<ListItem />', () => {
     // TODO: mock list service
     jest.mock('../../../../modules/lists/list.service')
     const { getByText, getByLabelText, queryByLabelText } = render(
-      <ListItem name="Test" id="0l28pul1z" />
+      <ListItem name="Test" id="0l28pul1z" listId="b9y7rp6wt" />
     )
 
     expect(queryByLabelText('Name')).toBeNull()

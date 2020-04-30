@@ -53,29 +53,19 @@ export const ListPage: FunctionComponent<ListPageProps> = ({ id }) => {
       </Columns>
 
       <Box padding="small">
-        <AddListItem
-          listId={id}
-          onSubmit={({ name }) => {
-            mutate(async (prevList) => {
-              const newItem = await ListService.createNewListItem(listId, {
-                name,
-              })
-
-              return {
-                ...prevList,
-                itemIds: [newItem.id, ...prevList.itemIds],
-                items: [newItem, ...prevList.items],
-              }
-            })
-          }}
-        />
+        <AddListItem listId={id} />
 
         <Box paddingTop="medium">
           <Stack space="xsmall">
             {listStatus === 'loading' && 'Loading...'}
             {listStatus === 'success' &&
               list?.items.map((item) => (
-                <ListItem name={item.name} key={item.id} id={item.id} />
+                <ListItem
+                  name={item.name}
+                  key={item.id}
+                  id={item.id}
+                  listId={id}
+                />
               ))}
           </Stack>
         </Box>
