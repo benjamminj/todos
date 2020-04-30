@@ -12,6 +12,8 @@ import { ListService } from '../../modules/lists/list.service'
 import { List } from '../../modules/lists/types'
 import { spacing } from '../../styles/spacing'
 import Link from 'next/link'
+import Router from 'next/router'
+import { Button } from '../../components/Button'
 /** @jsx jsx */ jsx
 
 interface Props {
@@ -27,45 +29,9 @@ interface Props {
 export const ListGroupsPage: FunctionComponent<Props> = ({ lists }) => {
   return (
     <Box css={{ backgroundColor: '#fafafa', minHeight: '100vh' }}>
-      <Columns paddingY="large" paddingX="small" css={{ alignItems: 'center' }}>
-        <Column>
-          <Text variant="h6">Lists</Text>
-        </Column>
-
-        <Column width="content">
-          <Box
-            css={{
-              width: spacing.large,
-              height: spacing.large,
-              borderRadius: spacing.large / 2,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 0 4px rgba(0,0,0,0.2)',
-              backgroundColor: 'white',
-            }}
-          >
-            <button
-              css={{
-                margin: 0,
-                padding: 0,
-                height: '100%',
-                width: '100%',
-                color: '#494949',
-                background: 'transparent',
-                border: 'none',
-              }}
-              onClick={() => console.log('🔥')}
-            >
-              <PlusIcon
-                width={spacing.medium * 1.25}
-                height={spacing.medium * 1.25}
-              />
-              {/* TODO: Visually hidden text "Add a list" */}
-            </button>
-          </Box>
-        </Column>
-      </Columns>
+      <Box paddingY="large" paddingX="small" css={{ alignItems: 'center' }}>
+        <Text variant="h6">Lists</Text>
+      </Box>
 
       <Box padding="small">
         <Stack space="small">
@@ -98,6 +64,16 @@ export const ListGroupsPage: FunctionComponent<Props> = ({ lists }) => {
             </Link>
           ))}
         </Stack>
+
+        {/* TODO: sticky on the bottom of the page? */}
+        <Box
+          paddingTop="large"
+          onClick={() => {
+            Router.push('/lists/new')
+          }}
+        >
+          <Button>Create a new list</Button>
+        </Box>
       </Box>
     </Box>
   )

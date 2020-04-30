@@ -71,7 +71,6 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
             />
           ) : (
             <Checkbox label={name} />
-            // <Text>{name}</Text>
           )}
         </Column>
 

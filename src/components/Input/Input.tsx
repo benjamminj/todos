@@ -1,7 +1,7 @@
 import { Box, BoxProps } from '../Box'
 import { FunctionComponent, InputHTMLAttributes } from 'react'
 import { jsx } from '@emotion/core'
-import { getFontStylesFromVariant } from '../Text'
+import { getFontStylesFromVariant, Text } from '../Text'
 import { HtmlElementProps } from '../../types/HtmlElementProps'
 /** @jsx jsx */ jsx
 
@@ -14,14 +14,17 @@ export interface InputProps extends BoxProps<'input'> {
 export const Input: FunctionComponent<InputProps> = ({
   label,
   elevation,
+  as = 'input',
+  placeholder,
   ...props
 }) => {
   return (
     <Box css={{ display: 'flex' }}>
       <Box
-        as="input"
+        as={as}
         padding="medium"
         css={{
+          appearance: 'none',
           width: '100%',
           borderRadius: 16,
           borderWidth: 2,
@@ -37,6 +40,7 @@ export const Input: FunctionComponent<InputProps> = ({
           },
         }}
         aria-label={label}
+        placeholder={placeholder || label}
         {...props}
       />
     </Box>
