@@ -10,13 +10,15 @@ import { FunctionComponent, useState } from 'react'
 import { Input } from '../../../components/Input'
 import { Text } from '../../../components/Text'
 import { CloseIcon } from '../../../components/CloseIcon'
+import { ListService } from '../../../modules/lists/list.service'
 /** @jsx jsx */ jsx
 
 export interface ListItemProps {
   name: string
+  id: string
 }
 
-export const ListItem: FunctionComponent<ListItemProps> = ({ name }) => {
+export const ListItem: FunctionComponent<ListItemProps> = ({ name, id }) => {
   const [editing, setEditing] = useState(false)
 
   return (
@@ -51,7 +53,10 @@ export const ListItem: FunctionComponent<ListItemProps> = ({ name }) => {
               }}
               defaultValue={name}
               label="Name"
-              onBlur={() => {
+              onBlur={(ev) => {
+                ListService.updateListItem(id, {
+                  name: ev.target.value,
+                })
                 setEditing(false)
               }}
             />

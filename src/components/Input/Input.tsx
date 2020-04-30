@@ -1,10 +1,15 @@
-import { Box, BoxProps } from '../Box'
-import { FunctionComponent } from 'react'
+import { Box } from '../Box'
+import { FunctionComponent, InputHTMLAttributes } from 'react'
 import { jsx } from '@emotion/core'
 import { getFontStylesFromVariant } from '../Text'
+import { HtmlElementProps } from '../../types/HtmlElementProps'
 /** @jsx jsx */ jsx
 
-export interface InputProps extends BoxProps<'input'> {
+export interface InputProps
+  extends HtmlElementProps<
+    HTMLInputElement,
+    InputHTMLAttributes<HTMLInputElement>
+  > {
   label: string
   elevation?: 'inset' | 'none' | 'raised'
   autoFocus?: boolean

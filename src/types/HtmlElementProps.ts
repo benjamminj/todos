@@ -1,6 +1,6 @@
-import { DetailedHTMLProps } from 'react'
+import { DetailedHTMLProps, HTMLAttributes } from 'react'
 
-export type HtmlElementProps<Element> = DetailedHTMLProps<
-  React.HTMLAttributes<Element>,
-  Element
->
+export type HtmlElementProps<
+  Element,
+  Attributes = HTMLAttributes<Element>
+> = DetailedHTMLProps<Attributes, Element>

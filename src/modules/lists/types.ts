@@ -13,7 +13,6 @@ export type ListColorScheme =
 export interface List {
   id: string
   name: string
-  // TODO: union type for possible schemes
   colorScheme: ListColorScheme
   itemIds: string[]
   items?: ListItem[]

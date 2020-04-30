@@ -1,11 +1,9 @@
 import { ReactNode } from 'react'
 import { jsx, InterpolationWithTheme } from '@emotion/core'
-import { HtmlElementProps } from '../../types/HtmlElementProps'
 import { SpacingToken, spacing } from '../../styles/spacing'
 /** @jsx jsx */ jsx
 
-export interface BoxProps<TagName extends keyof HTMLElementTagNameMap = 'div'>
-  extends HtmlElementProps<HTMLElementTagNameMap[TagName]> {
+export type BoxProps<TagName extends keyof JSX.IntrinsicElements = 'div'> = {
   children?: ReactNode
   padding?: SpacingToken
   paddingY?: SpacingToken
@@ -15,9 +13,9 @@ export interface BoxProps<TagName extends keyof HTMLElementTagNameMap = 'div'>
   paddingLeft?: SpacingToken
   paddingRight?: SpacingToken
   as?: TagName
-}
+} & JSX.IntrinsicElements[TagName]
 
-export const Box = <TagName extends keyof HTMLElementTagNameMap>({
+export const Box = <TagName extends keyof JSX.IntrinsicElements>({
   children,
   padding = 'none',
   paddingY,
@@ -62,7 +60,4 @@ export const Box = <TagName extends keyof HTMLElementTagNameMap>({
     },
     children
   )
-  // <div {...props} css={}>
-  //   {children}
-  // </div>
 }

@@ -1,3 +1,4 @@
+import React from 'react'
 import { SVGProps, FunctionComponent } from 'react'
 
 export const EditIcon: FunctionComponent<SVGProps<SVGSVGElement>> = (props) => {

@@ -4,7 +4,7 @@ import { ListService } from '../../modules/lists/list.service'
 import { Columns } from '../../components/Columns'
 import { Column } from '../../components/Column'
 import { List } from '../../modules/lists/types'
-import { FunctionComponent } from 'react'
+import { FunctionComponent, useCallback } from 'react'
 import { jsx } from '@emotion/core'
 import { Stack } from '../../components/Stack'
 import { Card } from '../../components/Card'
@@ -15,13 +15,28 @@ import { EditIcon } from '../../components/EditIcon'
 import { Input } from '../../components/Input'
 import { Fab } from '../../components/Fab/Fab'
 import { ListItem } from './components/ListItem'
+import { useQuery, useMutation } from 'rhdf'
+import { AddListItem } from './components/AddListItem'
 /** @jsx jsx */ jsx
 
 interface ListPageProps {
-  list: List
+  id: string
 }
 
-export const ListPage: FunctionComponent<ListPageProps> = ({ list }) => {
+export const ListPage: FunctionComponent<ListPageProps> = ({ id }) => {
+  const fetchItems = useCallback(
+    async () =>
+      ListService.getListById(id, {
+        expand: 'items',
+      }) as Required<List>,
+    []
+  )
+
+  const { data: list, status: listStatus } = useQuery<Required<List>>(
+    `/lists/${id}`,
+    fetchItems
+  )
+
   return (
     <Box css={{ backgroundColor: '#fafafa', minHeight: '100vh' }}>
       <Columns paddingY="large" paddingX="small" css={{ alignItems: 'center' }}>
@@ -31,33 +46,37 @@ export const ListPage: FunctionComponent<ListPageProps> = ({ list }) => {
               <a>←</a>
             </Link>
           </Box>
-          {list.name}
+
+          {listStatus === 'loading' && 'loading...'}
+          {listStatus === 'success' && list?.name}
         </Column>
       </Columns>
 
       <Box padding="small">
-        <Box css={{ position: 'relative' }}>
-          <Input label="add an item" placeholder="TESTS" elevation="inset" />
-          <Fab
-            label="Add"
-            css={{
-              position: 'absolute',
-              top: '50%',
-              right: spacing.small,
-              transform: 'translateY(-50%)',
-            }}
-          >
-            <PlusIcon />
-          </Fab>
-        </Box>
+        <AddListItem
+          listId={id}
+          onSubmit={({ name }) => {
+            mutate(async (prevList) => {
+              const newItem = await ListService.createNewListItem(listId, {
+                name,
+              })
+
+              return {
+                ...prevList,
+                itemIds: [newItem.id, ...prevList.itemIds],
+                items: [newItem, ...prevList.items],
+              }
+            })
+          }}
+        />
 
         <Box paddingTop="medium">
           <Stack space="xsmall">
-            {/* TODO: input component */}
-
-            {list.items?.map((item) => (
-              <ListItem name={item.name} key={item.id} />
-            ))}
+            {listStatus === 'loading' && 'Loading...'}
+            {listStatus === 'success' &&
+              list?.items.map((item) => (
+                <ListItem name={item.name} key={item.id} id={item.id} />
+              ))}
           </Stack>
         </Box>
       </Box>
@@ -68,12 +87,10 @@ export const ListPage: FunctionComponent<ListPageProps> = ({ list }) => {
 export const getServerSideProps: GetServerSideProps<ListPageProps> = async (
   ctx
 ) => {
-  const list = ListService.getListById(ctx.query.listId as string, {
-    expand: 'items',
-  })
   return {
     props: {
-      list,
+      id: ctx.query.listId as string,
+      // list,
     },
   }
 }

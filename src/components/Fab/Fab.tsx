@@ -25,6 +25,7 @@ export const Fab: FunctionComponent<FabProps> = ({
   return (
     <Box
       as="button"
+      type="button"
       css={{
         height: spacing[size],
         width: spacing[size],
