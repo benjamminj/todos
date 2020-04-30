@@ -46,9 +46,6 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
               padding="xsmall"
               css={{
                 margin: spacing.xsmall * -1,
-                // Prevents the text inside the input from wiggling
-                // when toggled back and forth
-                marginLeft: spacing.xsmall * -1 - 2,
               }}
               defaultValue={name}
               label="Name"
