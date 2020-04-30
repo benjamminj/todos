@@ -13,6 +13,7 @@ import { CloseIcon } from '../../../components/CloseIcon'
 import { ListService } from '../../../modules/lists/list.service'
 import { useMutation } from 'rhdf'
 import { List } from '../../../modules/lists/types'
+import { Checkbox } from '../../../components/Checkbox'
 /** @jsx jsx */ jsx
 
 export interface ListItemProps {
@@ -38,17 +39,7 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
       }}
     >
       <Columns css={{ alignItems: 'center' }}>
-        <Column width="content" paddingRight="small">
-          <Box
-            css={{
-              width: spacing.large,
-              height: spacing.large,
-              borderRadius: 8,
-              backgroundColor: '#eaeaea',
-            }}
-          />
-        </Column>
-        <Column paddingRight="small">
+        <Column>
           {editing ? (
             <Input
               autoFocus
@@ -82,7 +73,8 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
               }}
             />
           ) : (
-            <Text>{name}</Text>
+            <Checkbox label={name} />
+            // <Text>{name}</Text>
           )}
         </Column>
 

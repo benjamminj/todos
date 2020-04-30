@@ -3,9 +3,12 @@ import { HtmlElementProps } from '../../types/HtmlElementProps'
 import { FontVariantToken, fontVariants, fontConfig } from '../../styles/fonts'
 import { spacing } from '../../styles/spacing'
 import { jsx } from '@emotion/core'
+import { Box, BoxProps } from '../Box'
 /** @jsx jsx */ jsx
 
-export interface TextProps extends HtmlElementProps<HTMLSpanElement> {
+export type TextProps<
+  TagName extends keyof JSX.IntrinsicElements = 'span'
+> = BoxProps<TagName> & {
   variant?: FontVariantToken
   bold?: boolean
 }
@@ -23,21 +26,23 @@ export const getFontStylesFromVariant = (
   }
 }
 
-export const Text: FunctionComponent<TextProps> = ({
+export const Text = <TagName extends keyof JSX.IntrinsicElements>({
   children,
   variant = 'body',
   bold = false,
+  as = 'span' as TagName,
   ...props
-}) => {
+}: TextProps<TagName>) => {
   return (
-    <span
+    <Box
       {...props}
+      as={as}
       css={{
         display: 'block',
         ...getFontStylesFromVariant(variant, { bold }),
       }}
     >
       {children}
-    </span>
+    </Box>
   )
 }

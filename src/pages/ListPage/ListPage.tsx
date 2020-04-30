@@ -17,6 +17,7 @@ import { Fab } from '../../components/Fab/Fab'
 import { ListItem } from './components/ListItem'
 import { useQuery, useMutation } from 'rhdf'
 import { AddListItem } from './components/AddListItem'
+import { Checkbox } from '../../components/Checkbox'
 /** @jsx jsx */ jsx
 
 interface ListPageProps {
