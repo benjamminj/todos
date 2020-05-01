@@ -18,7 +18,7 @@
     "next": "latest",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
-    "rhdf": "^0.2.3"
+    "rhdf": "^0.2.9"
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.9.0",

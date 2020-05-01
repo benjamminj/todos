@@ -8,7 +8,7 @@ import { Button } from '../../components/Button'
 import { jsx } from '@emotion/core'
 import { Input } from '../../components/Input'
 import { Stack } from '../../components/Stack'
-import { listColors, ListColorScheme } from '../../modules/lists/types'
+import { listColors, ListColorScheme, List } from '../../modules/lists/types'
 import { Select } from '../../components/Select'
 import { useState } from 'react'
 import { ListService } from '../../modules/lists/list.service'
@@ -19,7 +19,10 @@ import Router from 'next/router'
 export const CreateListPage = () => {
   const [name, setName] = useState('')
   const [colorScheme, setColorScheme] = useState<ListColorScheme | ''>('')
-  const { mutate } = useMutation()
+
+  const { mutate } = useMutation<List>({
+    onSuccess: (data, cache) => cache.set(`/lists/${data.id}`, data),
+  })
 
   return (
     <Box css={{ minHeight: '100vh' }}>
@@ -48,10 +51,7 @@ export const CreateListPage = () => {
             if (!name || !colorScheme) return
 
             const list = ListService.createList({ name, colorScheme })
-
-            mutate(() => ({ ...list, items: [] }), {
-              cacheKey: `/lists/${list.id}`,
-            })
+            mutate(() => ({ ...list, items: [] }))
 
             Router.push('/lists/[listId]', `/lists/${list.id}`)
           }}
@@ -65,7 +65,6 @@ export const CreateListPage = () => {
 
             <Select
               label="Select a color"
-              elevation="inset"
               value={colorScheme}
               onChange={(ev) =>
                 setColorScheme(ev.target.value as ListColorScheme)

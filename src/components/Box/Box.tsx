@@ -1,4 +1,4 @@
-import { ReactNode, forwardRef, Ref, RefObject, AllHTMLAttributes } from 'react'
+import { ReactNode, forwardRef, AllHTMLAttributes } from 'react'
 import { jsx, InterpolationWithTheme } from '@emotion/core'
 import { SpacingToken, spacing } from '../../styles/spacing'
 /** @jsx jsx */ jsx

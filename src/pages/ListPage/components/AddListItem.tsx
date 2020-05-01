@@ -15,7 +15,9 @@ interface AddItemProps {
 }
 
 export const AddListItem: FunctionComponent<AddItemProps> = ({ listId }) => {
-  const { mutate } = useMutation<Required<List>>(`/lists/${listId}`)
+  const { mutate } = useMutation<Required<List> | null>({
+    key: `/lists/${listId}`,
+  })
   const [name, setName] = useState('')
 
   return (
@@ -25,6 +27,8 @@ export const AddListItem: FunctionComponent<AddItemProps> = ({ listId }) => {
           ev.preventDefault()
 
           mutate(async (prevList) => {
+            if (!prevList) return null
+
             const newItem = await ListService.createNewListItem(listId, {
               name,
             })
@@ -33,7 +37,7 @@ export const AddListItem: FunctionComponent<AddItemProps> = ({ listId }) => {
               ...prevList,
               itemIds: [newItem.id, ...prevList.itemIds],
               items: [newItem, ...prevList.items],
-            }
+            } as Required<List>
           })
 
           setName('')

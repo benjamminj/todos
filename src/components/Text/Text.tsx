@@ -22,13 +22,13 @@ export const getFontStylesFromVariant = (
   }
 }
 
-export const Text = <TagName extends keyof JSX.IntrinsicElements>({
+export const Text = ({
   children,
   variant = 'body',
   bold = false,
-  as = 'span' as TagName,
+  as = 'span',
   ...props
-}: TextProps<TagName>) => {
+}: TextProps) => {
   return (
     <Box
       {...props}

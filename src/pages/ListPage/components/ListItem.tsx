@@ -1,5 +1,4 @@
 import { jsx } from '@emotion/core'
-import { Box } from '../../../components/Box'
 import { Card } from '../../../components/Card'
 import { Column } from '../../../components/Column'
 import { Columns } from '../../../components/Columns'
@@ -8,7 +7,6 @@ import { Fab } from '../../../components/Fab/Fab'
 import { spacing } from '../../../styles/spacing'
 import { FunctionComponent, useState } from 'react'
 import { Input } from '../../../components/Input'
-import { Text } from '../../../components/Text'
 import { CloseIcon } from '../../../components/CloseIcon'
 import { ListService } from '../../../modules/lists/list.service'
 import { useMutation } from 'rhdf'
@@ -28,7 +26,9 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
   listId,
 }) => {
   const [editing, setEditing] = useState(false)
-  const { mutate } = useMutation<Required<List> | undefined>(`/lists/${listId}`)
+  const { mutate } = useMutation<Required<List> | undefined>({
+    key: `/lists/${listId}`,
+  })
 
   return (
     <Card

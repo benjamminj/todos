@@ -7,17 +7,10 @@ import { List } from '../../modules/lists/types'
 import { FunctionComponent, useCallback } from 'react'
 import { jsx } from '@emotion/core'
 import { Stack } from '../../components/Stack'
-import { Card } from '../../components/Card'
-import { spacing } from '../../styles/spacing'
-import { PlusIcon } from '../../components/PlusIcon'
 import Link from 'next/link'
-import { EditIcon } from '../../components/EditIcon'
-import { Input } from '../../components/Input'
-import { Fab } from '../../components/Fab/Fab'
 import { ListItem } from './components/ListItem'
-import { useQuery, useMutation } from 'rhdf'
+import { useQuery } from 'rhdf'
 import { AddListItem } from './components/AddListItem'
-import { Checkbox } from '../../components/Checkbox'
 /** @jsx jsx */ jsx
 
 interface ListPageProps {

@@ -5,8 +5,8 @@ import { getFontStylesFromVariant } from '../Text'
 /** @jsx jsx */ jsx
 
 export interface InputProps
-  extends Omit<BoxProps, 'onChange'>,
-    Pick<JSX.IntrinsicElements['input'], 'onChange'> {
+  extends Omit<BoxProps, 'onChange' | 'onBlur'>,
+    Pick<JSX.IntrinsicElements['input'], 'onChange' | 'onBlur'> {
   label: string
   elevation?: 'inset' | 'none' | 'raised'
   autoFocus?: boolean
