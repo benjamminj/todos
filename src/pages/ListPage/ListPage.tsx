@@ -11,6 +11,7 @@ import Link from 'next/link'
 import { ListItem } from './components/ListItem'
 import { useQuery } from 'rhdf'
 import { AddListItem } from './components/AddListItem'
+import { Text } from '../../components/Text'
 /** @jsx jsx */ jsx
 
 interface ListPageProps {
@@ -52,6 +53,14 @@ export const ListPage: FunctionComponent<ListPageProps> = ({ id }) => {
         <Box paddingTop="medium">
           <Stack space="xsmall">
             {listStatus === 'loading' && 'Loading...'}
+            {listStatus === 'success' && (list?.items.length ?? 0) === 0 && (
+              <Box
+                padding="medium"
+                css={{ display: 'flex', justifyContent: 'center' }}
+              >
+                <Text>Not items yet!</Text>
+              </Box>
+            )}
             {listStatus === 'success' &&
               list?.items.map((item) => (
                 <ListItem
