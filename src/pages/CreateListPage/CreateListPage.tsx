@@ -8,11 +8,19 @@ import { Button } from '../../components/Button'
 import { jsx } from '@emotion/core'
 import { Input } from '../../components/Input'
 import { Stack } from '../../components/Stack'
-import { listColors } from '../../modules/lists/types'
+import { listColors, ListColorScheme } from '../../modules/lists/types'
 import { Select } from '../../components/Select'
+import { useState } from 'react'
+import { ListService } from '../../modules/lists/list.service'
+import { useMutation } from 'rhdf'
+import Router from 'next/router'
 /** @jsx jsx */ jsx
 
 export const CreateListPage = () => {
+  const [name, setName] = useState('')
+  const [colorScheme, setColorScheme] = useState<ListColorScheme | ''>('')
+  const { mutate } = useMutation()
+
   return (
     <Box css={{ minHeight: '100vh' }}>
       <Box paddingY="large" paddingX="small" css={{ alignItems: 'center' }}>
@@ -32,23 +40,51 @@ export const CreateListPage = () => {
       </Box>
 
       <Box padding="small">
-        <Stack space="small">
-          <Input label="List Name" />
+        <form
+          onSubmit={(ev) => {
+            ev.preventDefault()
+            console.log(name, colorScheme)
+            // TODO: error validation / handling?
+            if (!name || !colorScheme) return
 
-          <Select label="Select a color" elevation="inset">
-            <option value="">Select a color</option>
+            const list = ListService.createList({ name, colorScheme })
 
-            {Object.entries(listColors).map(([key, color]) => (
-              <option key={key} value={key}>
-                {color.name}
-              </option>
-            ))}
-          </Select>
+            mutate(() => ({ ...list, items: [] }), {
+              cacheKey: `/lists/${list.id}`,
+            })
 
-          <Box paddingTop="large">
-            <Button>Create</Button>
-          </Box>
-        </Stack>
+            Router.push('/lists/[listId]', `/lists/${list.id}`)
+          }}
+        >
+          <Stack space="small">
+            <Input
+              label="List Name"
+              value={name}
+              onChange={(ev) => setName(ev.target.value)}
+            />
+
+            <Select
+              label="Select a color"
+              elevation="inset"
+              value={colorScheme}
+              onChange={(ev) =>
+                setColorScheme(ev.target.value as ListColorScheme)
+              }
+            >
+              <option value="">Select a color</option>
+
+              {Object.entries(listColors).map(([key, color]) => (
+                <option key={key} value={key}>
+                  {color.name}
+                </option>
+              ))}
+            </Select>
+
+            <Box paddingTop="large">
+              <Button type="submit">Create</Button>
+            </Box>
+          </Stack>
+        </form>
       </Box>
     </Box>
   )

@@ -4,7 +4,9 @@ import { jsx } from '@emotion/core'
 import { getFontStylesFromVariant } from '../Text'
 /** @jsx jsx */ jsx
 
-export interface InputProps extends BoxProps {
+export interface InputProps
+  extends Omit<BoxProps, 'onChange'>,
+    Pick<JSX.IntrinsicElements['input'], 'onChange'> {
   label: string
   elevation?: 'inset' | 'none' | 'raised'
   autoFocus?: boolean

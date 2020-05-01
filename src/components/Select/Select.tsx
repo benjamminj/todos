@@ -6,7 +6,9 @@ import { ChevronIcon } from '../ChevronIcon'
 import { spacing } from '../../styles/spacing'
 /** @jsx jsx */ jsx
 
-export interface SelectProps extends BoxProps {
+export interface SelectProps
+  extends Omit<BoxProps, 'onChange'>,
+    Pick<JSX.IntrinsicElements['select'], 'onChange'> {
   label: string
   children: ReactNode
   elevation?: 'inset' | 'none' | 'raised'
