@@ -4,18 +4,20 @@ import { ReactNode, FunctionComponent } from 'react'
 import { Text } from '../Text'
 /** @jsx jsx */ jsx
 
-export interface ButtonProps extends BoxProps<'button'> {
+export interface ButtonProps extends BoxProps {
   children: ReactNode
+  type?: 'submit' | 'button' | 'reset'
 }
 
 export const Button: FunctionComponent<ButtonProps> = ({
   children,
+  type = 'button',
   ...props
 }) => {
   return (
     <Box
       as="button"
-      type="button"
+      type={type}
       padding="medium"
       css={{
         background: '#ddd',
@@ -31,6 +33,11 @@ export const Button: FunctionComponent<ButtonProps> = ({
         ':focus': {
           outline: 'none',
           borderColor: '#555',
+        },
+
+        // Remove focus ring from button text since we do have focus styles
+        '::-moz-focus-inner': {
+          border: 0,
         },
       }}
       {...props}

@@ -9,7 +9,7 @@ import { CheckIcon } from '../CheckIcon'
 import { useId } from '@reach/auto-id'
 /** @jsx jsx */ jsx
 
-export interface CheckboxProps extends BoxProps<'input'> {
+export interface CheckboxProps extends Omit<BoxProps, 'label'> {
   label: ReactNode
 }
 

@@ -4,9 +4,7 @@ import { jsx } from '@emotion/core'
 import { Box, BoxProps } from '../Box'
 /** @jsx jsx */ jsx
 
-export type TextProps<
-  TagName extends keyof JSX.IntrinsicElements = 'span'
-> = BoxProps<TagName> & {
+export type TextProps = BoxProps & {
   variant?: FontVariantToken
   bold?: boolean
 }

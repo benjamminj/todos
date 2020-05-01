@@ -1,11 +1,10 @@
 import { Box, BoxProps } from '../Box'
-import { FunctionComponent, InputHTMLAttributes } from 'react'
+import { FunctionComponent } from 'react'
 import { jsx } from '@emotion/core'
-import { getFontStylesFromVariant, Text } from '../Text'
-import { HtmlElementProps } from '../../types/HtmlElementProps'
+import { getFontStylesFromVariant } from '../Text'
 /** @jsx jsx */ jsx
 
-export interface InputProps extends BoxProps<'input'> {
+export interface InputProps extends BoxProps {
   label: string
   elevation?: 'inset' | 'none' | 'raised'
   autoFocus?: boolean
@@ -19,18 +18,23 @@ export const Input: FunctionComponent<InputProps> = ({
   ...props
 }) => {
   return (
-    <Box css={{ display: 'flex' }}>
+    <Box
+      css={{
+        display: 'flex',
+        backgroundColor: elevation === 'inset' ? '#eaeaea' : 'transparent',
+        borderRadius: 16,
+      }}
+    >
       <Box
         as={as}
         padding="medium"
         css={{
-          appearance: 'none',
           width: '100%',
           borderRadius: 16,
           borderWidth: 2,
           borderStyle: 'solid',
           borderColor: '#ddd',
-          backgroundColor: elevation === 'inset' ? '#eaeaea' : 'transparent',
+          background: 'transparent',
 
           ...getFontStylesFromVariant('body'),
 

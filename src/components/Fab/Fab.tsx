@@ -5,7 +5,7 @@ import { jsx } from '@emotion/core'
 import { spacing, SpacingToken } from '../../styles/spacing'
 /** @jsx jsx */ jsx
 
-interface FabProps extends BoxProps<'button'> {
+interface FabProps extends Omit<BoxProps, 'size'> {
   children: ReactNode
   label: string
   size?: Extract<SpacingToken, 'large' | 'xlarge'>

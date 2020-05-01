@@ -9,6 +9,7 @@ import { jsx } from '@emotion/core'
 import { Input } from '../../components/Input'
 import { Stack } from '../../components/Stack'
 import { listColors } from '../../modules/lists/types'
+import { Select } from '../../components/Select'
 /** @jsx jsx */ jsx
 
 export const CreateListPage = () => {
@@ -34,7 +35,7 @@ export const CreateListPage = () => {
         <Stack space="small">
           <Input label="List Name" />
 
-          <Input as="select" label="Select a color">
+          <Select label="Select a color" elevation="inset">
             <option value="">Select a color</option>
 
             {Object.entries(listColors).map(([key, color]) => (
@@ -42,7 +43,7 @@ export const CreateListPage = () => {
                 {color.name}
               </option>
             ))}
-          </Input>
+          </Select>
 
           <Box paddingTop="large">
             <Button>Create</Button>
