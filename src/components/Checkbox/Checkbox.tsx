@@ -9,11 +9,15 @@ import { CheckIcon } from '../CheckIcon'
 import { useId } from '@reach/auto-id'
 /** @jsx jsx */ jsx
 
-export interface CheckboxProps extends Omit<BoxProps, 'label'> {
+export interface CheckboxProps extends Omit<BoxProps, 'label' | 'onChange'> {
   label: ReactNode
+  onChange?: JSX.IntrinsicElements['input']['onChange']
 }
 
-export const Checkbox: FunctionComponent<CheckboxProps> = ({ label }) => {
+export const Checkbox: FunctionComponent<CheckboxProps> = ({
+  label,
+  ...props
+}) => {
   const id = useId()
   const hoverStyles = {
     ':hover': {
@@ -40,6 +44,7 @@ export const Checkbox: FunctionComponent<CheckboxProps> = ({ label }) => {
             height: spacing.large,
             ...hoverStyles,
           }}
+          {...props}
         />
         <Box
           css={{

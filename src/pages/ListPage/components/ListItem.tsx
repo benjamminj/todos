@@ -10,7 +10,10 @@ import { Input } from '../../../components/Input'
 import { CloseIcon } from '../../../components/CloseIcon'
 import { ListService } from '../../../modules/lists/list.service'
 import { useMutation } from 'rhdf'
-import { List } from '../../../modules/lists/types'
+import {
+  List,
+  ListItem as ListItemInterface,
+} from '../../../modules/lists/types'
 import { Checkbox } from '../../../components/Checkbox'
 /** @jsx jsx */ jsx
 
@@ -18,20 +21,39 @@ export interface ListItemProps {
   name: string
   id: string
   listId: string
+  status: ListItemInterface['status']
 }
 
 export const ListItem: FunctionComponent<ListItemProps> = ({
   name,
   id,
   listId,
+  status,
 }) => {
   const [editing, setEditing] = useState(false)
   const { mutate } = useMutation<Required<List> | undefined>({
     key: `/lists/${listId}`,
   })
 
+  const updateItem = (update: Partial<ListItemInterface>) => {
+    mutate(async (prevList) => {
+      if (!prevList) return
+
+      const updatedItem = await ListService.updateListItem(id, update)
+
+      return {
+        ...prevList,
+        items:
+          prevList.items.map((item) =>
+            item.id === updatedItem.id ? updatedItem : item
+          ) || [],
+      }
+    })
+  }
+
   return (
     <Card
+      data-testid={`ListItem__${id}`}
       css={{
         backgroundColor: '#fff',
         borderRadius: 8,
@@ -70,7 +92,15 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
               }}
             />
           ) : (
-            <Checkbox label={name} />
+            <Checkbox
+              label={name}
+              checked={status === 'completed'}
+              onChange={(ev) => {
+                const status = ev.target.checked ? 'completed' : 'todo'
+
+                updateItem({ status })
+              }}
+            />
           )}
         </Column>
 

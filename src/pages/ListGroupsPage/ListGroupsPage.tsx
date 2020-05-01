@@ -37,7 +37,10 @@ export const ListGroupsPage: FunctionComponent<Props> = ({ lists }) => {
           {lists.map((list) => (
             <Link key={list.id} href="/lists/[listId]" as={`/lists/${list.id}`}>
               <a>
-                <Card css={{ backgroundColor: '#fff' }}>
+                <Card
+                  css={{ backgroundColor: '#fff' }}
+                  data-testid={`ListGroupCard__${list.id}`}
+                >
                   <Columns css={{ alignItems: 'center' }}>
                     <Column>
                       <Text variant="subtitle">{list.name}</Text>

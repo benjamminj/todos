@@ -12,6 +12,7 @@ import { ListItem } from './components/ListItem'
 import { useQuery } from 'rhdf'
 import { AddListItem } from './components/AddListItem'
 import { Text } from '../../components/Text'
+import { VisuallyHidden } from '../../components/VisuallyHidden'
 /** @jsx jsx */ jsx
 
 interface ListPageProps {
@@ -38,7 +39,9 @@ export const ListPage: FunctionComponent<ListPageProps> = ({ id }) => {
         <Column>
           <Box paddingRight="small" css={{ display: 'inline' }}>
             <Link href="/">
-              <a>←</a>
+              <a>
+                ←<VisuallyHidden>Back</VisuallyHidden>
+              </a>
             </Link>
           </Box>
 
@@ -58,9 +61,10 @@ export const ListPage: FunctionComponent<ListPageProps> = ({ id }) => {
                 padding="medium"
                 css={{ display: 'flex', justifyContent: 'center' }}
               >
-                <Text>Not items yet!</Text>
+                <Text>No items yet!</Text>
               </Box>
             )}
+
             {listStatus === 'success' &&
               list?.items.map((item) => (
                 <ListItem
@@ -68,6 +72,7 @@ export const ListPage: FunctionComponent<ListPageProps> = ({ id }) => {
                   key={item.id}
                   id={item.id}
                   listId={id}
+                  status={item.status}
                 />
               ))}
           </Stack>
