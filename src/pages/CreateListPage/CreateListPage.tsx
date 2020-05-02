@@ -46,7 +46,7 @@ export const CreateListPage = () => {
         <form
           onSubmit={(ev) => {
             ev.preventDefault()
-            console.log(name, colorScheme)
+
             // TODO: error validation / handling?
             if (!name || !colorScheme) return
 

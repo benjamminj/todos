@@ -2,3 +2,4 @@ node_modules
 .next
 .todo.md
 coverage/
+cypress/videos

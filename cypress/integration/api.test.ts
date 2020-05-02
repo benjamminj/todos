@@ -1,4 +1,4 @@
-import { List } from '../../src/modules/lists/types'
+// import { List } from '../../src/modules/lists/types'
 
 describe('API', () => {
   beforeEach(() => {
@@ -16,17 +16,19 @@ describe('API', () => {
     })
   })
 
-  context('POST /api/lists', () => {
+  context.only('POST /api/lists', () => {
     beforeEach(() => {
+      cy.request('/api/lists')
       cy.request('/api/lists').then((response) => {
         const listsToRemove = response.body
-          .filter((list: List) => /Test/g.test(list.name))
-          .map((list: List) => list.id)
+          .filter((list: any) => /Test/g.test(list.name))
+          .map((list: any) => list.id)
 
         cy.wrap(listsToRemove).each((id) => {
           cy.request({
             method: 'DELETE',
             url: `/api/lists/${id}`,
+            failOnStatusCode: false,
           })
         })
       })
@@ -183,7 +185,7 @@ describe('API', () => {
         cy.wrap(response.body).as('createdList')
       })
 
-      cy.get<List>('@createdList').then((list) => {
+      cy.get<{ id: string }>('@createdList').then((list) => {
         cy.request({
           method: 'DELETE',
           url: `/api/lists/${list.id}`,

@@ -7,8 +7,8 @@
     "start": "next start",
     "type-check": "tsc",
     "test": "jest",
-    "e2e": "cypress run",
-    "e2e:open": "cypress open"
+    "e2e": "yarn cypress run",
+    "e2e:open": "yarn cypress open"
   },
   "dependencies": {
     "@emotion/core": "^10.0.28",
