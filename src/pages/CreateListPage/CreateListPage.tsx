@@ -1,19 +1,19 @@
-import Link from 'next/link'
-import { Box } from '../../components/Box'
-import { Text } from '../../components/Text'
-import { Columns } from '../../components/Columns'
-import { Column } from '../../components/Column'
-import { VisuallyHidden } from '../../components/VisuallyHidden'
-import { Button } from '../../components/Button'
 import { jsx } from '@emotion/core'
-import { Input } from '../../components/Input'
-import { Stack } from '../../components/Stack'
-import { listColors, ListColorScheme, List } from '../../modules/lists/types'
-import { Select } from '../../components/Select'
-import { useState } from 'react'
-import { ListService } from '../../modules/lists/list.service'
-import { useMutation } from 'rhdf'
+import fetch from 'isomorphic-unfetch'
+import Link from 'next/link'
 import Router from 'next/router'
+import { useState } from 'react'
+import { useMutation } from 'rhdf'
+import { Box } from '../../components/Box'
+import { Button } from '../../components/Button'
+import { Column } from '../../components/Column'
+import { Columns } from '../../components/Columns'
+import { Input } from '../../components/Input'
+import { Select } from '../../components/Select'
+import { Stack } from '../../components/Stack'
+import { Text } from '../../components/Text'
+import { VisuallyHidden } from '../../components/VisuallyHidden'
+import { List, listColors, ListColorScheme } from '../../modules/lists/types'
 /** @jsx jsx */ jsx
 
 export const CreateListPage = () => {
@@ -44,13 +44,31 @@ export const CreateListPage = () => {
 
       <Box padding="small">
         <form
-          onSubmit={(ev) => {
+          onSubmit={async (ev) => {
             ev.preventDefault()
 
             // TODO: error validation / handling?
             if (!name || !colorScheme) return
 
-            const list = ListService.createList({ name, colorScheme })
+            // TODO: some generic fetch utilities?
+            const list = await fetch('/api/lists', {
+              method: 'post',
+              mode: 'same-origin',
+              headers: {
+                Accept: '*/*',
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ name, colorScheme }),
+            }).then((res) => {
+              if (res.status >= 300) {
+                throw new Error(
+                  `Failed to fetch: responded with status ${res.status}`
+                )
+              }
+
+              return res.json()
+            })
+
             mutate(() => ({ ...list, items: [] }))
 
             Router.push('/lists/[listId]', `/lists/${list.id}`)

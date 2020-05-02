@@ -20,13 +20,13 @@ interface ListPageProps {
 }
 
 export const ListPage: FunctionComponent<ListPageProps> = ({ id }) => {
-  const fetchItems = useCallback(
-    async () =>
-      ListService.getListById(id, {
-        expand: 'items',
-      }) as Required<List>,
-    []
-  )
+  const fetchItems = useCallback(async () => {
+    const list = await fetch(`/api/lists/${id}?expand=items`).then((res) =>
+      res.json()
+    )
+
+    return list
+  }, [])
 
   const { data: list, status: listStatus } = useQuery<Required<List>>(
     `/lists/${id}`,

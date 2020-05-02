@@ -1,13 +1,13 @@
 import { jsx } from '@emotion/core'
-import { useState, FunctionComponent } from 'react'
+import fetch from 'isomorphic-unfetch'
+import { FunctionComponent, useState } from 'react'
 import { useMutation } from 'rhdf'
 import { Box } from '../../../components/Box'
 import { Fab } from '../../../components/Fab'
 import { Input } from '../../../components/Input'
 import { PlusIcon } from '../../../components/PlusIcon'
-import { spacing } from '../../../styles/spacing'
 import { List } from '../../../modules/lists/types'
-import { ListService } from '../../../modules/lists/list.service'
+import { spacing } from '../../../styles/spacing'
 /** @jsx jsx */ jsx
 
 interface AddItemProps {
@@ -29,9 +29,13 @@ export const AddListItem: FunctionComponent<AddItemProps> = ({ listId }) => {
           mutate(async (prevList) => {
             if (!prevList) return null
 
-            const newItem = await ListService.createNewListItem(listId, {
-              name,
-            })
+            const newItem = await fetch(`/api/lists/${listId}/items`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ name }),
+            }).then((res) => res.json())
 
             return {
               ...prevList,
