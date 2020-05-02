@@ -1,13 +1,4 @@
-FROM cypress/included:4.5.0
-
-# # "root"
-# RUN whoami
-
-# # there is a built-in user "node" that comes from the very base Docker Node image
-# # move test runner binary folder to the non-root's user home directory
-# RUN mv /root/.cache /home/node/.cache
-
-# # USER node
+FROM cypress/base:12.16.1
 
 WORKDIR /user/app
 COPY package.json package.json
@@ -20,7 +11,10 @@ RUN yarn cypress install
 
 COPY . .
 
-ENV CYPRESS_BASE_URL=http://host.docker.internal:3000
+RUN yarn build 
+
+# TODO: this should be "dynamic" or point to an app running explicitly in the container.
+ENV CYPRESS_BASE_URL=http://localhost:3000
 ENV CYPRESS_VIDEO=false
-# ENTRYPOINT [ "node" ]
+
 CMD ["npm", "run", "e2e"]
