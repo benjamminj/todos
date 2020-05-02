@@ -69,8 +69,20 @@ export class ListService {
 
     if (!list) throw NotFoundError
 
+    // TODO: should we do a cascading delete?
     delete lists[id]
     return list
+  }
+
+  static getListItems(listId: string) {
+    const lists = getMockLists()
+    const list = lists[listId]
+
+    if (!list) throw NotFoundError
+
+    const items = getMockListItems()
+
+    return list.itemIds.map((itemId) => items[itemId]).filter((item) => item)
   }
 
   static createNewListItem(
@@ -85,6 +97,9 @@ export class ListService {
 
     if (!list) throw NotFoundError
     if (!item.name) throw InvalidInputError
+    if (item.status && ['todo', 'completed'].includes(item.status) === false) {
+      throw InvalidInputError
+    }
 
     const newItem: ListItem = {
       id,

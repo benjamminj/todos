@@ -136,6 +136,39 @@ describe('ListService', () => {
     ])
   })
 
+  describe('#getListItems', () => {
+    test('should allow you to get all items in a list', () => {
+      const listId = 'b9y7rp6wt'
+      expect(ListService.getListItems(listId)).toEqual([
+        {
+          description: null,
+          id: '0l28pul1z',
+          listId: 'b9y7rp6wt',
+          name: 'Bill',
+          status: 'todo',
+        },
+        {
+          description: null,
+          id: 'pyq6efgzn',
+          listId: 'b9y7rp6wt',
+          name: 'Susie',
+          status: 'todo',
+        },
+        {
+          description: null,
+          id: 'ws27so32t',
+          listId: 'b9y7rp6wt',
+          name: 'George',
+          status: 'todo',
+        },
+      ])
+    })
+
+    test('should throw error if the list id does not exist', () => {
+      expect(() => ListService.getListItems('potato')).toThrow()
+    })
+  })
+
   describe('#createNewListItem', () => {
     test('should allow you to create a new item in a list', () => {
       const itemDto = { name: 'Joe' }

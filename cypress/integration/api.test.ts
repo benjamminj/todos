@@ -1,4 +1,4 @@
-// import { List } from '../../src/modules/lists/types'
+import { List, ListItem } from '../../src/modules/lists/types'
 
 describe('API', () => {
   beforeEach(() => {
@@ -16,7 +16,7 @@ describe('API', () => {
     })
   })
 
-  context.only('POST /api/lists', () => {
+  context('POST /api/lists', () => {
     beforeEach(() => {
       cy.request('/api/lists')
       cy.request('/api/lists').then((response) => {
@@ -202,6 +202,179 @@ describe('API', () => {
         failOnStatusCode: false,
       }).then((response) => {
         expect(response.status).equals(404)
+      })
+    })
+  })
+
+  context('GET /api/lists/:id/items', () => {
+    it('should return all items in the list', () => {
+      // TODO: should seed in DB before?
+      const listId = 'b9y7rp6wt'
+      cy.request(`/api/lists/${listId}/items`).then((response) => {
+        expect(response.status).equals(200)
+        expect(response.body.length).equals(3)
+        expect(response.body.map((item: ListItem) => item.name)).deep.equals([
+          'Bill',
+          'Susie',
+          'George',
+        ])
+      })
+    })
+
+    it('should 404 if no list with the given id exists', () => {
+      cy.request({
+        url: `/api/lists/potato/items`,
+        failOnStatusCode: false,
+      }).then((response) => {
+        expect(response.status).equals(404)
+        expect(response.body.message).equals('Not found')
+      })
+    })
+  })
+
+  context('POST /api/lists/:id/items', () => {
+    const listName = 'List!'
+    const name = 'Cypress!'
+
+    beforeEach(() => {
+      cy.request('/api/lists').then((response) => {
+        const listToDelete = response.body.find(
+          (list: List) => list.name === listName
+        )
+
+        if (listToDelete) {
+          cy.request({
+            method: 'DELETE',
+            url: `/api/lists/${listToDelete.id}`,
+          })
+        }
+      })
+
+      cy.request({
+        method: 'POST',
+        url: `/api/lists`,
+        body: { name: listName, colorScheme: 'red' },
+      }).then((response) => {
+        cy.wrap(response.body.id).as('listId')
+      })
+    })
+
+    it('should create a new list item', () => {
+      cy.get('@listId').then((listId) => {
+        cy.request({
+          method: 'POST',
+          url: `/api/lists/${listId}/items`,
+          body: { name },
+        }).then((response) => {
+          expect(response.status).equals(201)
+          expect(response.body.name).equals(name)
+          expect(response.body.status).equals('todo')
+        })
+      })
+    })
+
+    it('should 404 if no list with the given id', () => {
+      cy.request({
+        method: 'POST',
+        url: `/api/lists/potato/items`,
+        body: { name },
+        failOnStatusCode: false,
+      }).then((response) => {
+        expect(response.status).equals(404)
+        expect(response.body.message).equals('Not found')
+      })
+    })
+
+    it('should return 400 if a missing name was passed', () => {
+      cy.get('@listId').then((listId) => {
+        cy.wrap(['', null]).each((value) => {
+          cy.request({
+            method: 'POST',
+            url: `/api/lists/${listId}/items`,
+            body: { name: value },
+            failOnStatusCode: false,
+          }).then((response) => {
+            expect(response.status).equals(400)
+            expect(response.body.message).equals('Invalid input')
+          })
+        })
+      })
+    })
+
+    it('should return 400 if an invalid status was passed', () => {
+      cy.get('@listId').then((listId) => {
+        cy.request({
+          method: 'POST',
+          url: `/api/lists/${listId}/items`,
+          body: { name, status: 'test!' },
+          failOnStatusCode: false,
+        }).then((response) => {
+          expect(response.status).equals(400)
+          expect(response.body.message).equals('Invalid input')
+        })
+      })
+    })
+  })
+
+  context('PATCH /api/items/:itemId', () => {
+    const itemId = '0l28pul1z'
+
+    const url = (itemId: string) => `/api/items/${itemId}`
+    beforeEach(() => {
+      cy.request({
+        method: 'PATCH',
+        url: url(itemId),
+        body: { name: 'Bill', status: 'todo' },
+      })
+    })
+
+    it('should allow updating an item', () => {
+      cy.request({
+        method: 'PATCH',
+        url: url(itemId),
+        body: { name: 'William', status: 'completed' },
+      }).then((response) => {
+        expect(response.status).equals(200)
+        expect(response.body.name).equals('William')
+        expect(response.body.status).equals('completed')
+      })
+    })
+
+    it('should 404 if no item with the given id exists', () => {
+      cy.request({
+        method: 'PATCH',
+        url: url('potato'),
+        body: { name: 'William', status: 'completed' },
+        failOnStatusCode: false,
+      }).then((response) => {
+        expect(response.status).equals(404)
+        expect(response.body.message).equals('Not found')
+      })
+    })
+
+    it('should 400 if a falsy name is passed', () => {
+      cy.wrap(['', null]).each((value) => {
+        cy.request({
+          method: 'PATCH',
+          url: url(itemId),
+          body: { name: value },
+          failOnStatusCode: false,
+        }).then((response) => {
+          expect(response.status).equals(400)
+          expect(response.body.message).equals('Invalid input')
+        })
+      })
+    })
+
+    it('should 400 if a invalid status is passed', () => {
+      cy.request({
+        method: 'PATCH',
+        url: url(itemId),
+        body: { status: 'potato' },
+        failOnStatusCode: false,
+      }).then((response) => {
+        expect(response.status).equals(400)
+        expect(response.body.message).equals('Invalid input')
       })
     })
   })
