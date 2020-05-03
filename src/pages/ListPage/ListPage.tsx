@@ -1,6 +1,5 @@
 import { GetServerSideProps } from 'next'
 import { Box } from '../../components/Box'
-import { ListService } from '../../modules/lists/list.service'
 import { Columns } from '../../components/Columns'
 import { Column } from '../../components/Column'
 import { List } from '../../modules/lists/types'
@@ -56,7 +55,7 @@ export const ListPage: FunctionComponent<ListPageProps> = ({ id }) => {
         <Box paddingTop="medium">
           <Stack space="xsmall">
             {listStatus === 'loading' && 'Loading...'}
-            {listStatus === 'success' && (list?.items.length ?? 0) === 0 && (
+            {listStatus === 'success' && (list?.items?.length ?? 0) === 0 && (
               <Box
                 padding="medium"
                 css={{ display: 'flex', justifyContent: 'center' }}

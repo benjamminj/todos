@@ -4,6 +4,20 @@ import { AddListItem } from '../AddListItem'
 import { CacheContextProvider } from 'rhdf'
 import { ListService } from '../../../../modules/lists/list.service'
 
+jest.mock('isomorphic-unfetch', () => {
+  return () => {
+    return Promise.resolve({
+      json: () => ({
+        id: 'pyq6efgzn',
+        listId: 'b9y7rp6wt',
+        name: 'Susie',
+        status: 'todo',
+        description: null,
+      }),
+    })
+  }
+})
+
 describe('<AddListItem />', () => {
   test('should allow you to add a list item', async () => {
     const id = 'b9y7rp6wt'

@@ -8,13 +8,13 @@ import { spacing } from '../../../styles/spacing'
 import { FunctionComponent, useState } from 'react'
 import { Input } from '../../../components/Input'
 import { CloseIcon } from '../../../components/CloseIcon'
-import { ListService } from '../../../modules/lists/list.service'
 import { useMutation } from 'rhdf'
 import {
   List,
   ListItem as ListItemInterface,
 } from '../../../modules/lists/types'
 import { Checkbox } from '../../../components/Checkbox'
+import fetch from 'isomorphic-unfetch'
 /** @jsx jsx */ jsx
 
 export interface ListItemProps {
@@ -39,7 +39,14 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
     mutate(async (prevList) => {
       if (!prevList) return
 
-      const updatedItem = await ListService.updateListItem(id, update)
+      const updatedItem = await fetch(`/api/items/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(update),
+      }).then((res) => res.json())
+      // const updatedItem = await ListService.updateListItem(id, update)
 
       return {
         ...prevList,
@@ -72,21 +79,19 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
               defaultValue={name}
               label="Name"
               onBlur={(ev) => {
-                mutate(async (prevList) => {
-                  if (!prevList) return
-
-                  const updatedItem = await ListService.updateListItem(id, {
-                    name: ev.target.value,
-                  })
-
-                  return {
-                    ...prevList,
-                    items:
-                      prevList.items.map((item) =>
-                        item.id === updatedItem.id ? updatedItem : item
-                      ) || [],
-                  }
+                updateItem({
+                  name: ev.target.value,
                 })
+                // const updatedItem = await ListService.updateListItem(id, )
+
+                // return {
+                //   ...prevList,
+                //   items:
+                //     prevList.items.map((item) =>
+                //       item.id === updatedItem.id ? updatedItem : item
+                //     ) || [],
+                // }
+                // })
 
                 setEditing(false)
               }}

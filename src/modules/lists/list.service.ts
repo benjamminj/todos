@@ -1,6 +1,6 @@
 import { getMockLists, getMockListItems } from './__mocks__/list.data'
 import { List, ListColorScheme, ListItem } from './types'
-import { generateId } from '../../utils/generateId'
+import { generateId } from '../../lib/generateId'
 
 const NotFoundError = new Error('Not found')
 const InvalidInputError = new Error('Invalid input')

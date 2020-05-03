@@ -5,16 +5,14 @@ import { ListItem } from '../ListItem'
 describe('<ListItem />', () => {
   test('should render the list item', () => {
     const { getByText } = render(
-      <ListItem name="Test" id="potato" listId="b9y7rp6wt" />
+      <ListItem name="Test" id="potato" listId="b9y7rp6wt" status="todo" />
     )
     expect(getByText('Test')).toBeInTheDocument()
   })
 
   test('should allow you to edit the item', () => {
-    // TODO: mock list service
-    jest.mock('../../../../modules/lists/list.service')
     const { getByText, getByLabelText, queryByLabelText } = render(
-      <ListItem name="Test" id="0l28pul1z" listId="b9y7rp6wt" />
+      <ListItem name="Test" id="0l28pul1z" listId="b9y7rp6wt" status="todo" />
     )
 
     expect(queryByLabelText('Name')).toBeNull()

@@ -29,13 +29,16 @@ export const AddListItem: FunctionComponent<AddItemProps> = ({ listId }) => {
           mutate(async (prevList) => {
             if (!prevList) return null
 
-            const newItem = await fetch(`/api/lists/${listId}/items`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ name }),
-            }).then((res) => res.json())
+            const newItem = await fetch(
+              `${process.env.BASE_API_URL}/api/lists/${listId}/items`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name }),
+              }
+            ).then((res) => res.json())
 
             return {
               ...prevList,
