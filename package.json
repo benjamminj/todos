@@ -9,7 +9,10 @@
     "test": "jest",
     "e2e": "start-server-and-test start 3000 e2e:run",
     "e2e:run": "yarn cypress run",
-    "e2e:open": "yarn cypress open"
+    "e2e:open": "yarn cypress open",
+    "migrate:make": "knex --cwd -x ts migrate:make",
+    "migrate:up": "knex --knexfile ./knexfile.ts migrate:latest",
+    "migrate:down": "knex --knexfile ./knexfile.ts migrate:rollback"
   },
   "dependencies": {
     "@emotion/core": "^10.0.28",
@@ -18,8 +21,10 @@
     "emotion": "^10.0.27",
     "emotion-server": "^10.0.27",
     "isomorphic-unfetch": "3.0.0",
+    "knex": "^0.21.1",
     "lodash": "^4.17.15",
     "next": "latest",
+    "pg": "^8.0.3",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "rhdf": "^0.2.9"
@@ -40,6 +45,7 @@
     "jest": "^25.3.0",
     "prettier": "^2.0.4",
     "start-server-and-test": "^1.11.0",
+    "ts-node": "^8.9.1",
     "typescript": "3.7.3"
   },
   "prettier": {
