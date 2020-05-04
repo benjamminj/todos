@@ -2,9 +2,9 @@ import { ListService } from './list.service'
 import { NextApiHandler } from 'next'
 import { listColors } from './types'
 
-export const handler: NextApiHandler = (req, res) => {
+export const handler: NextApiHandler = async (req, res) => {
   if (req.method === 'GET') {
-    const lists = ListService.getAllLists()
+    const lists = await ListService.getAllLists()
     return res.status(200).json(lists)
   }
 

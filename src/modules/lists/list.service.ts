@@ -1,17 +1,26 @@
 import { getMockLists, getMockListItems } from './__mocks__/list.data'
 import { List, ListColorScheme, ListItem } from './types'
 import { generateId } from '../../lib/generateId'
-import { query } from '../../lib/db'
+import { query, db } from '../../lib/db'
 
 const NotFoundError = new Error('Not found')
 const InvalidInputError = new Error('Invalid input')
 
 export class ListService {
   static async getAllLists() {
-    query(`SELECT id, name, color_scheme FROM lists;`).then((results) => {
-      console.log('results', results)
-    })
-    return Object.values(getMockLists())
+    return await query(`
+      SELECT
+        list.id as id,
+        list.name as name,
+        color_scheme as "colorScheme",
+        COALESCE(
+          array_agg(item.id) FILTER(WHERE item.id IS NOT NULL), 
+          '{}'
+        )  as "itemIds"
+      FROM lists list
+      LEFT JOIN list_items item ON item.list_id = list.id
+      GROUP BY list.id
+    `)
   }
 
   static getListById(id: string, params: { expand?: 'items' } = {}) {

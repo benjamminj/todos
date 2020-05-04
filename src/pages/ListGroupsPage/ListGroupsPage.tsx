@@ -7,12 +7,12 @@ import { Column } from '../../components/Column'
 import { Columns } from '../../components/Columns'
 import { Stack } from '../../components/Stack'
 import { Text } from '../../components/Text'
-import { ListService } from '../../modules/lists/list.service'
 import { List } from '../../modules/lists/types'
 import { spacing } from '../../styles/spacing'
 import Link from 'next/link'
 import Router from 'next/router'
 import { Button } from '../../components/Button'
+import fetch from 'isomorphic-unfetch'
 /** @jsx jsx */ jsx
 
 interface Props {
@@ -82,7 +82,9 @@ export const ListGroupsPage: FunctionComponent<Props> = ({ lists }) => {
 }
 
 export const getServerSideProps: GetServerSideProps<Props> = async () => {
-  const lists = await ListService.getAllLists()
+  const lists = await fetch(
+    `${process.env.BASE_API_URL}/api/lists`
+  ).then((res) => res.json())
 
   return {
     props: {

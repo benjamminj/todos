@@ -8,4 +8,4 @@ export const pg = knex({
 export const query = (
   query: string,
   parameters: knex.RawBinding[] | knex.ValueDict = {}
-) => pg.raw(query, parameters)
+) => pg.raw(query, parameters).then((res) => res.rows)
