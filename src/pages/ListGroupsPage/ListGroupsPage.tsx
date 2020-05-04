@@ -82,7 +82,7 @@ export const ListGroupsPage: FunctionComponent<Props> = ({ lists }) => {
 }
 
 export const getServerSideProps: GetServerSideProps<Props> = async () => {
-  const lists = ListService.getAllLists()
+  const lists = await ListService.getAllLists()
 
   return {
     props: {
