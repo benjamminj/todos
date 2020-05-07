@@ -18,7 +18,6 @@ describe('API', () => {
 
   context('POST /api/lists', () => {
     beforeEach(() => {
-      cy.request('/api/lists')
       cy.request('/api/lists').then((response) => {
         const listsToRemove = response.body
           .filter((list: any) => /Test/g.test(list.name))
@@ -96,18 +95,45 @@ describe('API', () => {
   })
 
   context('GET /api/lists/:id', () => {
-    it('should return the list with the given id', () => {
-      // TODO: need to seed actual list prior to this test
-      const listId = 'b9y7rp6wt'
-      cy.request(`/api/lists/${listId}`).then((response) => {
-        expect(response.status).equals(200)
-        expect(response.body.name).equals('People')
+    const name = 'Test Get One!'
+
+    beforeEach(() => {
+      cy.request(`/api/lists`).then((response) => {
+        const listsToRemove = response.body
+          .filter((list: any) => list.name === name)
+          .map((list: any) => list.id)
+
+        cy.wrap(listsToRemove).each((id) => {
+          cy.request({
+            method: 'DELETE',
+            url: `/api/lists/${id}`,
+            failOnStatusCode: false,
+          })
+        })
+      })
+
+      cy.request({
+        method: 'POST',
+        url: `/api/lists`,
+        body: { name, colorScheme: 'red' },
+      }).then((response) => {
+        cy.wrap(response.body.id).as('createdListId')
       })
     })
 
+    it('should return the list with the given id', () => {
+      cy.get('@createdListId').then((id) => {
+        cy.request(`/api/lists/${id}`).then((response) => {
+          expect(response.status).equals(200)
+          expect(response.body.name).equals(name)
+        })
+      })
+    })
+
+    // TODO: need to seed actual list prior to this test when PATCH is in
     it('should allow expanding the items in a list', () => {
-      // TODO: need to seed actual list prior to this test
-      const listId = 'b9y7rp6wt'
+      const listId = 'e84d392d-4cd0-46bd-bce3-819b7595c638'
+
       cy.request(`/api/lists/${listId}?expand=items`).then((response) => {
         expect(response.status).equals(200)
         expect(response.body.name).equals('People')
@@ -115,8 +141,19 @@ describe('API', () => {
       })
     })
 
+    it('should set items as an empty array if there are no items', () => {
+      cy.get('@createdListId').then((id) => {
+        cy.request(`/api/lists/${id}?expand=items`).then((response) => {
+          expect(response.status).equals(200)
+          expect(response.body.name).equals(name)
+          expect(response.body.items).to.be.an('array')
+          expect(response.body.items).to.have.length(0)
+        })
+      })
+    })
+
     it('should return 404 if no list was found for the id', () => {
-      const listId = 'potato'
+      const listId = '422e90f0-45a0-4166-b89c-f626c85e5efa'
       cy.request({ url: `/api/lists/${listId}`, failOnStatusCode: false }).then(
         (response) => {
           expect(response.status).equals(404)
@@ -129,43 +166,64 @@ describe('API', () => {
     // TODO: need to seed actual list prior to this test
     // TODO: might need to clean up list b/w each run?
     const listId = 'b9y7rp6wt'
+    const name = 'TEST update list'
 
     beforeEach(() => {
-      // TODO: should probably seed / reset the item directly in the DB when we get
-      // there
+      cy.request(`/api/lists`).then((response) => {
+        const listsToRemove = response.body
+          .filter((list: any) => list.name === name)
+          .map((list: any) => list.id)
+
+        cy.wrap(listsToRemove).each((id) => {
+          cy.request({
+            method: 'DELETE',
+            url: `/api/lists/${id}`,
+            failOnStatusCode: false,
+          })
+        })
+      })
+
       cy.request({
-        method: 'PATCH',
-        url: `/api/lists/${listId}`,
-        body: { name: 'People', color: 'cyan' },
+        method: 'POST',
+        url: `/api/lists`,
+        body: { name, colorScheme: 'red' },
+      }).then((response) => {
+        cy.wrap(response.body.id).as('createdListId')
       })
     })
 
     it("should allow you to update a list's name", () => {
-      cy.request({
-        method: 'PATCH',
-        url: `/api/lists/${listId}`,
-        body: { name: 'Potatoes' },
-      }).then((response) => {
-        expect(response.status).equals(200)
-        expect(response.body.name).equals('Potatoes')
+      cy.get('@createdListId').then((id) => {
+        cy.request({
+          method: 'PATCH',
+          url: `/api/lists/${id}`,
+          body: { name: 'Potatoes' },
+        }).then((response) => {
+          expect(response.status).equals(200)
+          expect(response.body.name).equals('Potatoes')
+        })
       })
     })
 
     it("should allow you to update a list's color scheme", () => {
-      cy.request({
-        method: 'PATCH',
-        url: `/api/lists/${listId}`,
-        body: { colorScheme: 'gray' },
-      }).then((response) => {
-        expect(response.status).equals(200)
-        expect(response.body.colorScheme).equals('gray')
+      cy.get('@createdListId').then((id) => {
+        cy.request({
+          method: 'PATCH',
+          url: `/api/lists/${id}`,
+          body: { colorScheme: 'gray' },
+        }).then((response) => {
+          expect(response.status).equals(200)
+          expect(response.body.colorScheme).equals('gray')
+        })
       })
     })
 
     it('should return 404 error if a list by that id does not exist', () => {
+      const id = 'aa99d3e0-c268-44ed-9519-ba1c2619884c'
+
       cy.request({
         method: 'PATCH',
-        url: `/api/lists/potato`,
+        url: `/api/lists/${id}`,
         body: { colorScheme: 'gray' },
         failOnStatusCode: false,
       }).then((response) => {
@@ -182,10 +240,10 @@ describe('API', () => {
         url: `/api/lists`,
         body: { name: 'Cypress!', colorScheme: 'red' },
       }).then((response) => {
-        cy.wrap(response.body).as('createdList')
+        cy.wrap(response.body).as('createdListId')
       })
 
-      cy.get<{ id: string }>('@createdList').then((list) => {
+      cy.get<{ id: string }>('@createdListId').then((list) => {
         cy.request({
           method: 'DELETE',
           url: `/api/lists/${list.id}`,
@@ -196,9 +254,11 @@ describe('API', () => {
     })
 
     it('should 404 if no list with the given id exists', () => {
+      const id = '6f1041bf-c843-4e18-9445-545acfdc6d2b'
+
       cy.request({
         method: 'DELETE',
-        url: `/api/lists/potato`,
+        url: `/api/lists/${id}`,
         failOnStatusCode: false,
       }).then((response) => {
         expect(response.status).equals(404)

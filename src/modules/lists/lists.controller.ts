@@ -20,7 +20,7 @@ export const handler: NextApiHandler = async (req, res) => {
       return res.status(400).json({ message: 'Invalid color scheme' })
     }
 
-    const list = ListService.createList(req.body)
+    const list = await ListService.createList(req.body)
     return res.status(201).json(list)
   }
 

@@ -8,83 +8,90 @@ const InvalidInputError = new Error('Invalid input')
 
 export class ListService {
   static async getAllLists() {
-    return await query(`
-      SELECT
-        list.id as id,
-        list.name as name,
-        color_scheme as "colorScheme",
-        COALESCE(
-          array_agg(item.id) FILTER(WHERE item.id IS NOT NULL), 
-          '{}'
-        )  as "itemIds"
-      FROM lists list
-      LEFT JOIN list_items item ON item.list_id = list.id
-      GROUP BY list.id
-    `)
+    return await db
+      .select(
+        'lists.id',
+        'lists.name',
+        'lists.color_scheme as colorScheme',
+        db.raw(`
+          COALESCE(
+            array_agg(list_items.id) FILTER(WHERE list_items.id IS NOT NULL), 
+            '{}'
+          )  as "itemIds"
+        `)
+      )
+      .from('lists')
+      .leftJoin('list_items', 'lists.id', 'list_items.list_id')
+      .groupBy('lists.id')
   }
 
-  static getListById(id: string, params: { expand?: 'items' } = {}) {
-    const lists = getMockLists()
-    const list = lists[id]
-
-    if (!list) throw NotFoundError
-
+  static async getListById(id: string, params: { expand?: 'items' } = {}) {
     if (params.expand === 'items') {
-      const items = getMockListItems()
+      const [listWithItems] = await db
+        .select(
+          'lists.id',
+          'lists.name',
+          'lists.color_scheme as colorScheme',
+          db.raw(`
+            COALESCE(
+              json_agg(list_items) FILTER(WHERE list_items.id IS NOT NULL), 
+              '[]'
+            )  as "items"
+          `)
+        )
+        .from('lists')
+        .where('lists.id', id)
+        .leftJoin('list_items', 'lists.id', 'list_items.list_id')
+        .groupBy('lists.id')
 
-      const attachedItems = list.itemIds
-        .map((itemId) => items[itemId])
-        .filter((item) => item)
-
-      return {
-        ...list,
-        items: attachedItems,
-      }
+      if (!listWithItems) throw NotFoundError
+      return listWithItems
     }
+
+    const [list] = await db
+      .select('id', 'name', 'color_scheme as colorScheme')
+      .from('lists')
+      .where('id', id)
+
+    if (!list) throw NotFoundError
 
     return list
   }
 
-  static createList({ name, colorScheme }: Pick<List, 'name' | 'colorScheme'>) {
-    const id = generateId()
+  static async createList({
+    name,
+    colorScheme,
+  }: Pick<List, 'name' | 'colorScheme'>) {
+    const [newList] = await db
+      .insert({ name, color_scheme: colorScheme })
+      .into('lists')
+      .returning(['id', 'name', 'color_scheme as colorScheme'])
 
-    const lists = getMockLists()
-    lists[id] = {
-      id,
-      name,
-      colorScheme,
-      itemIds: [],
-    }
-
-    return lists[id]
+    return newList
   }
 
-  static updateList(
+  static async updateList(
     id: string,
-    updates: { name?: string; colorScheme?: ListColorScheme }
+    { name, colorScheme }: { name?: string; colorScheme?: ListColorScheme }
   ) {
-    const lists = getMockLists()
-    const list = lists[id]
+    const [updatedItem] = await db('lists')
+      .update({ name, color_scheme: colorScheme })
+      .where('id', id)
+      .returning(['id', 'name', 'color_scheme as colorScheme'])
 
-    if (!list) throw NotFoundError
-
-    lists[id] = {
-      ...list,
-      ...updates,
-    }
-
-    return lists[id]
+    if (!updatedItem) throw NotFoundError
+    return updatedItem
   }
 
-  static deleteList(id: string) {
-    const lists = getMockLists()
-    const list = lists[id]
+  static async deleteList(id: string) {
+    const [deletedItem] = await db('lists')
+      .where('id', id)
+      .delete()
+      .returning(['id', 'name', 'color_scheme as colorScheme'])
 
-    if (!list) throw NotFoundError
+    if (!deletedItem) throw NotFoundError
 
-    // TODO: should we do a cascading delete?
-    delete lists[id]
-    return list
+    return deletedItem
   }
 
   static getListItems(listId: string) {

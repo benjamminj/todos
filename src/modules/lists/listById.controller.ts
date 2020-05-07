@@ -1,7 +1,7 @@
 import { ListService } from './list.service'
 import { NextApiHandler } from 'next'
 
-export const handler: NextApiHandler = (req, res) => {
+export const handler: NextApiHandler = async (req, res) => {
   const id = req.query.listId as string
 
   try {
@@ -10,7 +10,7 @@ export const handler: NextApiHandler = (req, res) => {
         return res.status(400).json({ message: 'Expand may only be "items"' })
       }
 
-      const list = ListService.getListById(id, {
+      const list = await ListService.getListById(id, {
         expand: req.query.expand as 'items',
       })
 
@@ -18,12 +18,12 @@ export const handler: NextApiHandler = (req, res) => {
     }
 
     if (req.method === 'PATCH') {
-      const updatedList = ListService.updateList(id, req.body)
+      const updatedList = await ListService.updateList(id, req.body)
       return res.status(200).json(updatedList)
     }
 
     if (req.method === 'DELETE') {
-      const deleted = ListService.deleteList(id)
+      const deleted = await ListService.deleteList(id)
       return res.status(200).json(deleted)
     }
   } catch (error) {

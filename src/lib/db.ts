@@ -1,6 +1,6 @@
 import knex from 'knex'
 
-export const pg = knex({
+export const db = knex({
   client: 'pg',
   connection: process.env.POSTGRES_URI,
 })
@@ -8,4 +8,4 @@ export const pg = knex({
 export const query = (
   query: string,
   parameters: knex.RawBinding[] | knex.ValueDict = {}
-) => pg.raw(query, parameters).then((res) => res.rows)
+) => db.raw(query, parameters).then((res) => res.rows)
