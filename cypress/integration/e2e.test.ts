@@ -9,11 +9,18 @@ describe('E2E', () => {
   it('should be able to view a list', () => {
     cy.visit('/')
 
-    cy.wrap([
-      { name: 'People', count: 3, id: 'b9y7rp6wt' },
-      { name: 'Places', count: 3, id: 'pu74257m9' },
-      { name: 'Things', count: 4, id: '0suhn5703' },
-    ]).each(
+    cy.request('/api/lists').then((response) => {
+      cy.wrap(
+        response.body
+          .map((list: List) => ({
+            ...list,
+            count: list.itemIds.length,
+          }))
+          .filter((list: List & { count: number }) => list.count > 0)
+      ).as('lists')
+    })
+
+    cy.get('@lists').each(
       ({ name, count, id }: { name: string; count: number; id: string }) => {
         cy.findByTestId(`ListGroupCard__${id}`).findByText(`${count}`)
         cy.findByTestId(`ListGroupCard__${id}`).findByText(name).click()

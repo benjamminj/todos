@@ -69,7 +69,7 @@ export const CreateListPage = () => {
               return res.json()
             })
 
-            mutate(() => ({ ...list, items: [] }))
+            mutate(() => ({ ...list, items: [], itemIds: [] }))
 
             Router.push('/lists/[listId]', `/lists/${list.id}`)
           }}

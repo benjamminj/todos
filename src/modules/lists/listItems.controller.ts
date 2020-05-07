@@ -1,17 +1,17 @@
 import { NextApiHandler } from 'next'
 import { ListService } from './list.service'
 
-export const handler: NextApiHandler = (req, res) => {
+export const handler: NextApiHandler = async (req, res) => {
   const id = req.query.listId as string
 
   try {
     if (req.method === 'GET') {
-      const items = ListService.getListItems(id)
+      const items = await ListService.getListItems(id)
       return res.status(200).json(items)
     }
 
     if (req.method === 'POST') {
-      const newItem = ListService.createNewListItem(id, req.body)
+      const newItem = await ListService.createNewListItem(id, req.body)
       return res.status(201).json(newItem)
     }
   } catch (error) {

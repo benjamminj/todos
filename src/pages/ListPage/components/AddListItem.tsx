@@ -42,8 +42,8 @@ export const AddListItem: FunctionComponent<AddItemProps> = ({ listId }) => {
 
             return {
               ...prevList,
-              itemIds: [newItem.id, ...prevList.itemIds],
-              items: [newItem, ...prevList.items],
+              itemIds: [newItem.id, ...(prevList.itemIds || [])],
+              items: [newItem, ...(prevList.items || [])],
             } as Required<List>
           })
 

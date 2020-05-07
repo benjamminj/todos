@@ -163,15 +163,13 @@ describe('API', () => {
   })
 
   context('PATCH /api/lists/:id', () => {
-    // TODO: need to seed actual list prior to this test
-    // TODO: might need to clean up list b/w each run?
-    const listId = 'b9y7rp6wt'
     const name = 'TEST update list'
+    const updateName = 'Potatoes'
 
     beforeEach(() => {
       cy.request(`/api/lists`).then((response) => {
         const listsToRemove = response.body
-          .filter((list: any) => list.name === name)
+          .filter((list: any) => list.name === name || list.name === updateName)
           .map((list: any) => list.id)
 
         cy.wrap(listsToRemove).each((id) => {
@@ -267,23 +265,58 @@ describe('API', () => {
   })
 
   context('GET /api/lists/:id/items', () => {
+    const name = 'TEST get list items'
+
+    beforeEach(() => {
+      cy.request(`/api/lists`).then((response) => {
+        const listsToRemove = response.body
+          .filter((list: any) => list.name === name)
+          .map((list: any) => list.id)
+
+        cy.wrap(listsToRemove).each((id) => {
+          cy.request({
+            method: 'DELETE',
+            url: `/api/lists/${id}`,
+            failOnStatusCode: false,
+          })
+        })
+      })
+
+      cy.request({
+        method: 'POST',
+        url: `/api/lists`,
+        body: { name, colorScheme: 'red' },
+      }).then((response) => {
+        cy.wrap(response.body.id).as('createdListId')
+      })
+    })
+
     it('should return all items in the list', () => {
-      // TODO: should seed in DB before?
-      const listId = 'b9y7rp6wt'
-      cy.request(`/api/lists/${listId}/items`).then((response) => {
-        expect(response.status).equals(200)
-        expect(response.body.length).equals(3)
-        expect(response.body.map((item: ListItem) => item.name)).deep.equals([
-          'Bill',
-          'Susie',
-          'George',
-        ])
+      cy.get('@createdListId').then((id) => {
+        cy.wrap(['FIRST', 'SECOND', 'THIRD']).each((itemName) => {
+          cy.request({
+            method: 'POST',
+            url: `/api/lists/${id}/items`,
+            body: { name: itemName },
+          })
+        })
+
+        cy.request(`/api/lists/${id}/items`).then((response) => {
+          expect(response.status).equals(200)
+          expect(response.body.length).equals(3)
+          expect(response.body.map((item: ListItem) => item.name)).deep.equals([
+            'FIRST',
+            'SECOND',
+            'THIRD',
+          ])
+        })
       })
     })
 
     it('should 404 if no list with the given id exists', () => {
+      const id = 'f3772a0b-e0f7-4433-b60d-7b7b04fd3001'
       cy.request({
-        url: `/api/lists/potato/items`,
+        url: `/api/lists/${id}/items`,
         failOnStatusCode: false,
       }).then((response) => {
         expect(response.status).equals(404)
@@ -293,21 +326,22 @@ describe('API', () => {
   })
 
   context('POST /api/lists/:id/items', () => {
-    const listName = 'List!'
-    const name = 'Cypress!'
+    const listName = 'TEST LIST create item'
+    const name = 'TEST create new list item'
 
     beforeEach(() => {
-      cy.request('/api/lists').then((response) => {
-        const listToDelete = response.body.find(
-          (list: List) => list.name === listName
-        )
+      cy.request(`/api/lists`).then((response) => {
+        const listsToRemove = response.body
+          .filter((list: any) => list.name === listName)
+          .map((list: any) => list.id)
 
-        if (listToDelete) {
+        cy.wrap(listsToRemove).each((id) => {
           cy.request({
             method: 'DELETE',
-            url: `/api/lists/${listToDelete.id}`,
+            url: `/api/lists/${id}`,
+            failOnStatusCode: false,
           })
-        }
+        })
       })
 
       cy.request({
@@ -334,9 +368,10 @@ describe('API', () => {
     })
 
     it('should 404 if no list with the given id', () => {
+      const id = '7b65caf2-4549-4e2b-a4d8-24714c086c43'
       cy.request({
         method: 'POST',
-        url: `/api/lists/potato/items`,
+        url: `/api/lists/${id}/items`,
         body: { name },
         failOnStatusCode: false,
       }).then((response) => {
@@ -378,32 +413,64 @@ describe('API', () => {
 
   context('PATCH /api/items/:itemId', () => {
     const itemId = '0l28pul1z'
-
     const url = (itemId: string) => `/api/items/${itemId}`
+
+    const listName = 'TEST LIST update item'
+    const itemName = 'TEST ITEM update item'
+
     beforeEach(() => {
+      cy.request(`/api/lists`).then((response) => {
+        const listsToRemove = response.body
+          .filter((list: any) => list.name === listName)
+          .map((list: any) => list.id)
+
+        cy.wrap(listsToRemove).each((id) => {
+          cy.request({
+            method: 'DELETE',
+            url: `/api/lists/${id}`,
+            failOnStatusCode: false,
+          })
+        })
+      })
+
       cy.request({
-        method: 'PATCH',
-        url: url(itemId),
-        body: { name: 'Bill', status: 'todo' },
+        method: 'POST',
+        url: `/api/lists`,
+        body: { name: listName, colorScheme: 'red' },
+      }).then((response) => {
+        cy.wrap(response.body.id).as('listId')
+      })
+
+      cy.get('@listId').then((id) => {
+        cy.request({
+          method: 'POST',
+          url: `/api/lists/${id}/items`,
+          body: { name: itemName },
+        }).then((response) => {
+          cy.wrap(response.body.id).as('createdItemId')
+        })
       })
     })
 
     it('should allow updating an item', () => {
-      cy.request({
-        method: 'PATCH',
-        url: url(itemId),
-        body: { name: 'William', status: 'completed' },
-      }).then((response) => {
-        expect(response.status).equals(200)
-        expect(response.body.name).equals('William')
-        expect(response.body.status).equals('completed')
+      cy.get<string>('@createdItemId').then((id) => {
+        cy.request({
+          method: 'PATCH',
+          url: url(id),
+          body: { name: 'William', status: 'completed' },
+        }).then((response) => {
+          expect(response.status).equals(200)
+          expect(response.body.name).equals('William')
+          expect(response.body.status).equals('completed')
+        })
       })
     })
 
     it('should 404 if no item with the given id exists', () => {
+      const id = '7039ed1c-b094-4a7c-aad0-e29ccf08173c'
       cy.request({
         method: 'PATCH',
-        url: url('potato'),
+        url: url(id),
         body: { name: 'William', status: 'completed' },
         failOnStatusCode: false,
       }).then((response) => {
@@ -413,28 +480,32 @@ describe('API', () => {
     })
 
     it('should 400 if a falsy name is passed', () => {
-      cy.wrap(['', null]).each((value) => {
-        cy.request({
-          method: 'PATCH',
-          url: url(itemId),
-          body: { name: value },
-          failOnStatusCode: false,
-        }).then((response) => {
-          expect(response.status).equals(400)
-          expect(response.body.message).equals('Invalid input')
+      cy.get<string>('@createdItemId').then((id) => {
+        cy.wrap(['', null]).each((value) => {
+          cy.request({
+            method: 'PATCH',
+            url: url(id),
+            body: { name: value },
+            failOnStatusCode: false,
+          }).then((response) => {
+            expect(response.status).equals(400)
+            expect(response.body.message).equals('Invalid input')
+          })
         })
       })
     })
 
     it('should 400 if a invalid status is passed', () => {
-      cy.request({
-        method: 'PATCH',
-        url: url(itemId),
-        body: { status: 'potato' },
-        failOnStatusCode: false,
-      }).then((response) => {
-        expect(response.status).equals(400)
-        expect(response.body.message).equals('Invalid input')
+      cy.get<string>('@createdItemId').then((id) => {
+        cy.request({
+          method: 'PATCH',
+          url: url(id),
+          body: { status: 'potato' },
+          failOnStatusCode: false,
+        }).then((response) => {
+          expect(response.status).equals(400)
+          expect(response.body.message).equals('Invalid input')
+        })
       })
     })
   })

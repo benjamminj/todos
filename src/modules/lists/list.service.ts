@@ -94,67 +94,62 @@ export class ListService {
     return deletedItem
   }
 
-  static getListItems(listId: string) {
-    const lists = getMockLists()
-    const list = lists[listId]
+  static async getListItems(listId: string) {
+    try {
+      const lists = await db('lists').where('id', listId)
 
-    if (!list) throw NotFoundError
+      if (lists.length !== 1) throw NotFoundError
 
-    const items = getMockListItems()
-
-    return list.itemIds.map((itemId) => items[itemId]).filter((item) => item)
+      const returnedItems = await db('list_items').where('list_id', listId)
+      return returnedItems
+    } catch (error) {
+      if (error.code === '23503') throw NotFoundError
+      throw error
+    }
   }
 
-  static createNewListItem(
+  static async createNewListItem(
     listId: string,
     item: { name: ListItem['name']; status?: ListItem['status'] }
   ) {
-    const id = generateId()
-    const listItems = getMockListItems()
-    const lists = getMockLists()
-
-    const list = lists[listId]
-
-    if (!list) throw NotFoundError
     if (!item.name) throw InvalidInputError
     if (item.status && ['todo', 'completed'].includes(item.status) === false) {
       throw InvalidInputError
     }
 
-    const newItem: ListItem = {
-      id,
-      listId,
-      description: null,
-      status: 'todo',
-      ...item,
+    try {
+      const [returnedItem] = await db
+        .insert({ ...item, list_id: listId })
+        .into('list_items')
+        .returning(['id', 'name', 'status', 'description'])
+
+      return returnedItem
+    } catch (error) {
+      if (error.code === '23503') throw NotFoundError
+      throw error
     }
-
-    listItems[id] = newItem
-    list.itemIds.push(id)
-
-    return newItem
   }
 
-  static updateListItem(
+  static async updateListItem(
     itemId: string,
     updates: Partial<Pick<ListItem, 'name' | 'status'>>
   ) {
-    const listItems = getMockListItems()
-    const item = listItems[itemId]
-
     const hasNameError = 'name' in updates && !updates.name
     const hasStatusError =
       'status' in updates &&
       ['todo', 'completed'].includes(updates.status as string) === false
-
     if (hasNameError || hasStatusError) throw InvalidInputError
-    if (!item) throw NotFoundError
 
-    listItems[itemId] = {
-      ...item,
-      ...updates,
+    try {
+      const [updatedItem] = await db('list_items')
+        .update(updates)
+        .where('id', itemId)
+        .returning(['id', 'name', 'status'])
+
+      if (!updatedItem) throw NotFoundError
+      return updatedItem
+    } catch (error) {
+      throw error
     }
-
-    return listItems[itemId]
   }
 }
