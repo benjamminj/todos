@@ -31,6 +31,7 @@ export const handler: NextApiHandler = async (req, res) => {
       return res.status(404).json({ message: 'Not found' })
     }
 
+    console.error(req.method, '/lists/:id', error)
     return res.status(500).json({ message: 'Internal server error' })
   }
 
