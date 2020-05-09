@@ -1,7 +1,5 @@
-import { getMockLists, getMockListItems } from './__mocks__/list.data'
 import { List, ListColorScheme, ListItem } from './types'
-import { generateId } from '../../lib/generateId'
-import { query, db } from '../../lib/db'
+import { db } from '../../lib/db'
 
 const NotFoundError = new Error('Not found')
 const InvalidInputError = new Error('Invalid input')

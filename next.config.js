@@ -3,7 +3,7 @@ require('dotenv').config()
 module.exports = {
   env: {
     BASE_API_URL: process.env.BASE_API_URL,
-    POSTGRES_URI: process.env.POSTGRES_URI,
+    DATABASE_URL: process.env.DATABASE_URL,
   },
   typescript: {
     ignoreDevErrors: true,
