@@ -67,7 +67,7 @@ export const ListPage: FunctionComponent<ListPageProps> = ({ id }) => {
             )}
 
             {listStatus === 'success' &&
-              list?.items.map((item) => (
+              list?.items?.map((item) => (
                 <ListItem
                   name={item.name}
                   key={item.id}
