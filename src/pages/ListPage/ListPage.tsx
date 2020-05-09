@@ -12,6 +12,7 @@ import { useQuery } from 'rhdf'
 import { AddListItem } from './components/AddListItem'
 import { Text } from '../../components/Text'
 import { VisuallyHidden } from '../../components/VisuallyHidden'
+import { fetch } from '../../lib/fetch'
 /** @jsx jsx */ jsx
 
 interface ListPageProps {
