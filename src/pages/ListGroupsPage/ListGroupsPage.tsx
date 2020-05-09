@@ -82,10 +82,15 @@ export const ListGroupsPage: FunctionComponent<Props> = ({ lists }) => {
 }
 
 export const getServerSideProps: GetServerSideProps<Props> = async () => {
-  console.log(process.env.BASE_API_URL)
-  const lists = await fetch(
-    `${process.env.BASE_API_URL}/api/lists`
-  ).then((res) => res.json())
+  let lists = []
+
+  try {
+    lists = await fetch(`${process.env.BASE_API_URL}/api/lists`).then((res) =>
+      res.json()
+    )
+  } catch (error) {
+    throw new Error(`FAILED TO FETCH ${process.env.BASE_API_URL}`)
+  }
 
   return {
     props: {
