@@ -12,7 +12,7 @@ import { spacing } from '../../styles/spacing'
 import Link from 'next/link'
 import Router from 'next/router'
 import { Button } from '../../components/Button'
-import fetch from 'isomorphic-unfetch'
+import { fetch } from '../../lib/fetch'
 /** @jsx jsx */ jsx
 
 interface Props {
@@ -82,15 +82,7 @@ export const ListGroupsPage: FunctionComponent<Props> = ({ lists }) => {
 }
 
 export const getServerSideProps: GetServerSideProps<Props> = async () => {
-  let lists = []
-
-  try {
-    lists = await fetch(`${process.env.BASE_API_URL}/api/lists`).then((res) =>
-      res.json()
-    )
-  } catch (error) {
-    throw new Error(`FAILED TO FETCH ${process.env.BASE_API_URL}`)
-  }
+  const lists = await fetch(`/api/lists`).then((res) => res.json())
 
   return {
     props: {

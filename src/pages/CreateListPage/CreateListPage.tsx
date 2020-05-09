@@ -1,6 +1,6 @@
 import { jsx } from '@emotion/core'
-import fetch from 'isomorphic-unfetch'
 import Link from 'next/link'
+import { fetch } from '../../lib/fetch'
 import Router from 'next/router'
 import { useState } from 'react'
 import { useMutation } from 'rhdf'
@@ -51,7 +51,7 @@ export const CreateListPage = () => {
             if (!name || !colorScheme) return
 
             // TODO: some generic fetch utilities?
-            const list = await fetch(`${process.env.BASE_API_URL}/api/lists`, {
+            const list = await fetch(`/api/lists`, {
               method: 'post',
               mode: 'same-origin',
               headers: {
