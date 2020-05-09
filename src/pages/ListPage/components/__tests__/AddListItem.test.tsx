@@ -2,7 +2,6 @@ import React from 'react'
 import { render, fireEvent } from '@testing-library/react'
 import { AddListItem } from '../AddListItem'
 import { CacheContextProvider } from 'rhdf'
-import { ListService } from '../../../../modules/lists/list.service'
 
 jest.mock('isomorphic-unfetch', () => {
   return () => {
@@ -23,13 +22,7 @@ describe('<AddListItem />', () => {
     const id = 'b9y7rp6wt'
 
     const { getByLabelText, getByText } = render(
-      <CacheContextProvider
-        cache={
-          new Map([
-            [`/lists/${id}`, ListService.getListById(id, { expand: 'items' })],
-          ])
-        }
-      >
+      <CacheContextProvider>
         <AddListItem listId={id} />
       </CacheContextProvider>
     )
