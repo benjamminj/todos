@@ -39,13 +39,16 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
     mutate(async (prevList) => {
       if (!prevList) return
 
-      const updatedItem = await fetch(`/api/items/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(update),
-      }).then((res) => res.json())
+      const updatedItem = await fetch(
+        `${process.env.BASE_API_URL}/api/items/${id}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(update),
+        }
+      ).then((res) => res.json())
       // const updatedItem = await ListService.updateListItem(id, update)
 
       return {

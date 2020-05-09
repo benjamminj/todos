@@ -51,7 +51,7 @@ export const CreateListPage = () => {
             if (!name || !colorScheme) return
 
             // TODO: some generic fetch utilities?
-            const list = await fetch('/api/lists', {
+            const list = await fetch(`${process.env.BASE_API_URL}/api/lists`, {
               method: 'post',
               mode: 'same-origin',
               headers: {
