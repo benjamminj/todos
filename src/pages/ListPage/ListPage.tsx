@@ -20,7 +20,6 @@ interface ListPageProps {
 }
 
 export const ListPage: FunctionComponent<ListPageProps> = ({ id }) => {
-  console.warn('process.env.BASE_API_URL', process.env.BASE_API_URL)
   const fetchItems = useCallback(async () => {
     const list = await fetch(`/api/lists/${id}?expand=items`).then((res) =>
       res.json()
