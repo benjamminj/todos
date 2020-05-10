@@ -3,10 +3,11 @@ import { ListService } from './list.service'
 
 export const handler: NextApiHandler = async (req, res) => {
   const itemId = req.query.itemId as string
+  const listId = req.query.listId as string
 
   try {
     if (req.method === 'PATCH') {
-      const updated = await ListService.updateListItem(itemId, req.body)
+      const updated = await ListService.updateListItem(listId, itemId, req.body)
       res.status(200).json(updated)
     }
   } catch (error) {
