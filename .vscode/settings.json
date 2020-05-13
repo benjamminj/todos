@@ -1,10 +1,10 @@
 {
   "workbench.colorCustomizations": {
-    "statusBar.background": "#d09c7e",
-    "statusBar.border": "#d09c7e",
+    "statusBar.background": "#12df3f",
+    "statusBar.border": "#12df3f",
     "statusBar.foreground": "#15202b",
-    "statusBarItem.hoverBackground": "#c27f59"
+    "statusBarItem.hoverBackground": "#0eb032"
   },
-  "peacock.color": "#d09c7e",
+  "peacock.color": "#12df3f",
   "typescript.tsdk": "node_modules/typescript/lib"
 }
