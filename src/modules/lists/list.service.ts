@@ -154,7 +154,6 @@ export class ListService {
 
   // TODO: remove need to pass in list id
   static async updateListItem(
-    listId: string,
     itemId: string,
     updates: Partial<Pick<ListItem, 'name' | 'status'>>
   ) {
