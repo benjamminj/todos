@@ -1,9 +1,8 @@
+import faunadb from 'faunadb'
 import { List, ListColorScheme, ListItem } from './types'
 
 const NotFoundError = new Error('Not found')
 const InvalidInputError = new Error('Invalid input')
-
-import faunadb from 'faunadb'
 
 const secret = process.env.FAUNADB_KEY as string
 

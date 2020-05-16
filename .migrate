@@ -1,0 +1,9 @@
+{
+  "lastRun": "1589520981722-setup-db.ts",
+  "migrations": [
+    {
+      "title": "1589520981722-setup-db.ts",
+      "timestamp": 1589593993052
+    }
+  ]
+}

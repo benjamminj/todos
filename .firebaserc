@@ -1,7 +1,0 @@
-{
-  "projects": {
-    "default": "todos-staging",
-    "production": "todos-252d8",
-    "staging": "todos-staging"
-  }
-}

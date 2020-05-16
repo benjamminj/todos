@@ -10,9 +10,9 @@
     "e2e": "start-server-and-test start 3000 e2e:run",
     "e2e:run": "yarn cypress run",
     "e2e:open": "yarn cypress open",
-    "migrate:make": "knex --cwd -x ts migrate:make",
-    "migrate:up": "knex --knexfile ./knexfile.ts migrate:latest",
-    "migrate:down": "knex --knexfile ./knexfile.ts migrate:rollback"
+    "migrate:make": "yarn migrate --compiler=\"ts:./migrate-compiler.js\" create",
+    "migrate:up": "yarn migrate --compiler=\"ts:./migrate-compiler.js\" up",
+    "migrate:down": "yarn migrate --compiler=\"ts:./migrate-compiler.js\" down"
   },
   "dependencies": {
     "@emotion/core": "^10.0.28",
@@ -49,10 +49,12 @@
     "@types/testing-library__cypress": "^5.0.5",
     "cypress": "^4.5.0",
     "cypress-dotenv": "^1.2.0",
+    "esm": "^3.2.25",
     "jest": "^25.3.0",
+    "migrate": "^1.6.2",
     "prettier": "^2.0.4",
     "start-server-and-test": "^1.11.0",
-    "ts-node": "^8.9.1",
+    "ts-node": "^8.10.1",
     "typescript": "3.7.3"
   },
   "prettier": {
