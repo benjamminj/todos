@@ -1,17 +1,44 @@
-// TODO: fix TS error
 import * as faunadb from 'faunadb'
+import dotenv from 'dotenv'
 
-type Noop = () => void
+dotenv.config()
 
 const secret = process.env.FAUNADB_KEY as string
 
-// @ts-ignore
 const client = new faunadb.Client({ secret })
+const q = faunadb.query
 
-module.exports.up = function (next: Noop) {
-  next()
+exports.up = async () => {
+  try {
+    await client.query(q.CreateCollection({ name: 'lists' }))
+    await client.query(q.CreateCollection({ name: 'items' }))
+
+    await client.query(
+      q.CreateIndex({
+        name: 'all_lists',
+        source: q.Collection('lists'),
+      })
+    )
+
+    await client.query(
+      q.CreateIndex({
+        name: 'items_by_listId',
+        source: q.Collection('items'),
+        terms: [{ field: ['data', 'listId'] }],
+      })
+    )
+  } catch (error) {
+    console.error(error)
+    throw error
+  }
 }
 
-module.exports.down = function (next: Noop) {
-  next()
+exports.down = async () => {
+  try {
+    await client.query(q.Delete(q.Collection('items')))
+    await client.query(q.Delete(q.Collection('lists')))
+  } catch (error) {
+    console.error(error)
+    throw error
+  }
 }

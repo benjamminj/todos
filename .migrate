@@ -3,7 +3,7 @@
   "migrations": [
     {
       "title": "1589520981722-setup-db.ts",
-      "timestamp": 1589593993052
+      "timestamp": 1589596027399
     }
   ]
 }
