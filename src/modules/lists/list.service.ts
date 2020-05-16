@@ -1,109 +1,110 @@
+import faunadb from 'faunadb'
 import { List, ListColorScheme, ListItem } from './types'
-import { db } from '../../lib/db'
 
 const NotFoundError = new Error('Not found')
 const InvalidInputError = new Error('Invalid input')
 
+const secret = process.env.FAUNADB_KEY as string
+
+const q = faunadb.query
+const client = new faunadb.Client({ secret })
+
 export class ListService {
   static async getAllLists() {
-    return await db
-      .select(
-        'lists.id',
-        'lists.name',
-        'lists.color_scheme as colorScheme',
-        db.raw(`
-          COALESCE(
-            array_agg(list_items.id) FILTER(WHERE list_items.id IS NOT NULL), 
-            '{}'
-          )  as "itemIds"
-        `)
+    const lists = await client.query<{ data: List[] }>(
+      q.Map(q.Paginate(q.Match(q.Index('all_lists'))), (ref) =>
+        q.Select('data', q.Get(ref))
       )
-      .from('lists')
-      .leftJoin('list_items', 'lists.id', 'list_items.list_id')
-      .groupBy('lists.id')
+    )
+
+    return lists.data
   }
 
   static async getListById(id: string, params: { expand?: 'items' } = {}) {
-    if (params.expand === 'items') {
-      const [listWithItems] = await db
-        .select(
-          'lists.id',
-          'lists.name',
-          'lists.color_scheme as colorScheme',
-          db.raw(`
-            COALESCE(
-              json_agg(list_items) FILTER(WHERE list_items.id IS NOT NULL), 
-              '[]'
-            )  as "items"
-          `)
-        )
-        .from('lists')
-        .where('lists.id', id)
-        .leftJoin('list_items', 'lists.id', 'list_items.list_id')
-        .groupBy('lists.id')
+    try {
+      const list = await client.query(
+        q.Select('data', q.Get(q.Ref(q.Collection('lists'), id)))
+      )
 
-      if (!listWithItems) throw NotFoundError
-      return listWithItems
+      // NOTE: see if there's a better way in FQL to JOIN this to the query
+      // for the lists rather than 2 round trips
+      if (params.expand === 'items') {
+        const items = await ListService.getListItems(id)
+        return { ...list, items }
+      }
+
+      return list
+    } catch (error) {
+      if (error.name === 'NotFound') throw NotFoundError
+      throw error
     }
-
-    const [list] = await db
-      .select('id', 'name', 'color_scheme as colorScheme')
-      .from('lists')
-      .where('id', id)
-
-    if (!list) throw NotFoundError
-
-    return list
   }
 
   static async createList({
     name,
     colorScheme,
   }: Pick<List, 'name' | 'colorScheme'>) {
-    const [newList] = await db
-      .insert({ name, color_scheme: colorScheme })
-      .into('lists')
-      .returning(['id', 'name', 'color_scheme as colorScheme'])
+    const id = await client.query(q.NewId())
 
-    return newList
+    const created = await client.query<{ data: List }>(
+      q.Create(q.Ref(q.Collection('lists'), id), {
+        data: { name, colorScheme, id, itemIds: [] },
+      })
+    )
+
+    return created.data
   }
 
   static async updateList(
     id: string,
-    { name, colorScheme }: { name?: string; colorScheme?: ListColorScheme }
+    updates: { name?: string; colorScheme?: ListColorScheme }
   ) {
-    const [updatedItem] = await db('lists')
-      .update({ name, color_scheme: colorScheme })
-      .where('id', id)
-      .returning(['id', 'name', 'color_scheme as colorScheme'])
+    try {
+      const updated = await client.query<{ data: List }>(
+        q.Update(q.Ref(q.Collection('lists'), id), { data: updates })
+      )
 
-    if (!updatedItem) throw NotFoundError
-    return updatedItem
+      return updated.data
+    } catch (error) {
+      if (error.name === 'NotFound') throw NotFoundError
+      throw error
+    }
   }
 
   static async deleteList(id: string) {
-    const [deletedItem] = await db('lists')
-      .where('id', id)
-      .delete()
-      .returning(['id', 'name', 'color_scheme as colorScheme'])
-
-    if (!deletedItem) throw NotFoundError
-
-    return deletedItem
-  }
-
-  static async getListItems(listId: string) {
     try {
-      const lists = await db('lists').where('id', listId)
+      const deleted = await client.query<{ data: List }>(
+        q.Delete(q.Ref(q.Collection('lists'), id))
+      )
 
-      if (lists.length !== 1) throw NotFoundError
+      await client.query(
+        q.Map(q.Paginate(q.Match(q.Index('items_by_listId'), id)), (ref) =>
+          q.Delete(ref)
+        )
+      )
 
-      const returnedItems = await db('list_items').where('list_id', listId)
-      return returnedItems
+      return deleted.data
     } catch (error) {
-      if (error.code === '23503') throw NotFoundError
+      if (error.name === 'NotFound') throw NotFoundError
       throw error
     }
+  }
+
+  // TODO:
+  static async getListItems(listId: string) {
+    try {
+      await client.query(q.Get(q.Ref(q.Collection('lists'), listId)))
+    } catch (error) {
+      if (error.name === 'NotFound') throw NotFoundError
+      throw error
+    }
+    const items = await client.query<{ data: ListItem[] }>(
+      q.Map(q.Paginate(q.Match(q.Index('items_by_listId'), listId)), (ref) =>
+        q.Select('data', q.Get(ref))
+      )
+    )
+
+    return items.data
   }
 
   static async createNewListItem(
@@ -115,19 +116,46 @@ export class ListService {
       throw InvalidInputError
     }
 
-    try {
-      const [returnedItem] = await db
-        .insert({ ...item, list_id: listId })
-        .into('list_items')
-        .returning(['id', 'name', 'status', 'description'])
+    const defaultItem = {
+      status: 'todo',
+    }
 
-      return returnedItem
+    const id = await client.query(q.NewId())
+
+    try {
+      // TODO: see if this can be combined into a single query
+      const itemIds = await client.query<string[]>(
+        q.Select(
+          ['data', 'itemIds'],
+          q.Get(q.Ref(q.Collection('lists'), listId))
+        )
+      )
+
+      await client.query(
+        q.Update(q.Ref(q.Collection('lists'), listId), {
+          data: { itemIds: [...itemIds, id] },
+        })
+      )
+
+      const created = await client.query<{ data: ListItem }>(
+        q.Create(q.Ref(q.Collection('items'), id), {
+          data: {
+            ...defaultItem,
+            ...item,
+            id,
+            listId,
+          },
+        })
+      )
+
+      return created.data
     } catch (error) {
-      if (error.code === '23503') throw NotFoundError
+      if (error.name === 'NotFound') throw NotFoundError
       throw error
     }
   }
 
+  // TODO: remove need to pass in list id
   static async updateListItem(
     itemId: string,
     updates: Partial<Pick<ListItem, 'name' | 'status'>>
@@ -139,14 +167,13 @@ export class ListService {
     if (hasNameError || hasStatusError) throw InvalidInputError
 
     try {
-      const [updatedItem] = await db('list_items')
-        .update(updates)
-        .where('id', itemId)
-        .returning(['id', 'name', 'status'])
+      const updated = await client.query<{ data: ListItem }>(
+        q.Update(q.Ref(q.Collection('items'), itemId), { data: updates })
+      )
 
-      if (!updatedItem) throw NotFoundError
-      return updatedItem
+      return updated.data
     } catch (error) {
+      if (error.name === 'NotFound') throw NotFoundError
       throw error
     }
   }

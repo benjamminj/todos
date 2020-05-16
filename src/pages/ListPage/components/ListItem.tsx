@@ -39,7 +39,7 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
     mutate(async (prevList) => {
       if (!prevList) return
 
-      const updatedItem = await fetch(`/api/items/${id}`, {
+      const updatedItem = await fetch(`/api/lists/${listId}/items/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
