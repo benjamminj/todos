@@ -46,5 +46,5 @@ export interface ListItem {
   listId: string
   status: 'completed' | 'todo'
   name: string
-  description: string | null
+  description?: string | null
 }
