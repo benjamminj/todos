@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "next",
     "build": "next build",
+    "prestart": "yarn migrate:up",
     "start": "next start",
     "type-check": "tsc",
     "test": "jest",
