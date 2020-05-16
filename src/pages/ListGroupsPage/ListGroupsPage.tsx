@@ -83,7 +83,7 @@ export const ListGroupsPage: FunctionComponent<Props> = ({ lists }) => {
 
 export const getServerSideProps: GetServerSideProps<Props> = async () => {
   const lists = await fetch(`/api/lists`).then((res) => res.json())
-  console.log('LISTS', lists)
+
   return {
     props: {
       name: 'test',

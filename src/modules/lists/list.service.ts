@@ -26,7 +26,7 @@ export class ListService {
         q.Select('data', q.Get(q.Ref(q.Collection('lists'), id)))
       )
 
-      // TODO: see if there's a better way to JOIN this to the query
+      // NOTE: see if there's a better way in FQL to JOIN this to the query
       // for the lists rather than 2 round trips
       if (params.expand === 'items') {
         const items = await ListService.getListItems(id)
@@ -77,7 +77,11 @@ export class ListService {
         q.Delete(q.Ref(q.Collection('lists'), id))
       )
 
-      // TODO: delete all items attached to the list as well.
+      await client.query(
+        q.Map(q.Paginate(q.Match(q.Index('items_by_listId'), id)), (ref) =>
+          q.Delete(ref)
+        )
+      )
 
       return deleted.data
     } catch (error) {

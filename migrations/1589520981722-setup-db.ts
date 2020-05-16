@@ -12,14 +12,12 @@ exports.up = async () => {
   try {
     await client.query(q.CreateCollection({ name: 'lists' }))
     await client.query(q.CreateCollection({ name: 'items' }))
-
     await client.query(
       q.CreateIndex({
         name: 'all_lists',
         source: q.Collection('lists'),
       })
     )
-
     await client.query(
       q.CreateIndex({
         name: 'items_by_listId',
