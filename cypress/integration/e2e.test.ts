@@ -105,7 +105,7 @@ describe('E2E', () => {
     })
   })
 
-  it('should be able to edit the name of a list', () => {
+  it('should be able to edit the name of a list item', () => {
     const name = 'Test!'
     const items = ['Russia', 'Scotland', 'Washington']
 
@@ -152,7 +152,6 @@ describe('E2E', () => {
     cy.findByText(name).should('be.visible')
     cy.findByLabelText('Add an item').should('be.visible')
 
-    // const itemId = '8i1efj9z2'
     cy.get('@Russia__id').then((itemId) => {
       cy.findByTestId(`ListItem__${itemId}`)
         .findByText('Edit')

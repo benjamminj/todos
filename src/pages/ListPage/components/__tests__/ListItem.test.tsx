@@ -1,6 +1,38 @@
 import React from 'react'
 import { render, fireEvent } from '@testing-library/react'
 import { ListItem } from '../ListItem'
+import { CacheContextProvider } from 'rhdf'
+import { ListItem as ListItemInterface } from '../../../../modules/lists/types'
+import { fetch } from '../../../../lib/fetch'
+
+jest.mock('../../../../lib/fetch', () => {
+  return {
+    fetch: jest.fn().mockResolvedValue({
+      json: async () => ({
+        id: '123',
+        listId: 'TEST-LIST-ID',
+        status: 'todo',
+        name: 'TEST FROM API',
+      }),
+    }),
+  }
+})
+
+const listId = '1234'
+const mockItem: ListItemInterface = {
+  id: '123',
+  listId,
+  status: 'todo',
+  name: 'Test',
+  description: null,
+}
+const mockList = {
+  id: '1234',
+  name: 'mock list',
+  colorScheme: 'red',
+  itemIds: [mockItem.id],
+  items: [mockItem],
+}
 
 describe('<ListItem />', () => {
   test('should render the list item', () => {
@@ -10,7 +42,30 @@ describe('<ListItem />', () => {
     expect(getByText('Test')).toBeInTheDocument()
   })
 
-  test('should allow you to edit the item', () => {
+  test('should allow you to edit the item', async () => {
+    const { getByText, getByLabelText, queryByLabelText } = render(
+      <CacheContextProvider cache={new Map([[`/lists/${listId}`, mockList]])}>
+        <ListItem {...mockItem} />
+      </CacheContextProvider>
+    )
+
+    expect(queryByLabelText('Name')).toBeNull()
+    fireEvent.click(getByText('Edit'))
+
+    const $input = getByLabelText('Name') as HTMLInputElement
+    expect($input).toBeInTheDocument()
+    expect($input.value).toEqual('Test')
+
+    fireEvent.change($input, { target: { value: 'Testz' } })
+
+    expect($input.value).toEqual('Testz')
+
+    fireEvent.blur($input)
+
+    expect(fetch).toHaveBeenCalledTimes(1)
+  })
+
+  test('should submit the "edit" form when pressing ENTER', async () => {
     const { getByText, getByLabelText, queryByLabelText } = render(
       <ListItem name="Test" id="0l28pul1z" listId="b9y7rp6wt" status="todo" />
     )
@@ -26,6 +81,8 @@ describe('<ListItem />', () => {
 
     expect($input.value).toEqual('Testz')
 
-    fireEvent.blur($input)
+    fireEvent.keyPress($input, { key: 'Enter' })
+
+    expect(fetch).toHaveBeenCalledTimes(1)
   })
 })

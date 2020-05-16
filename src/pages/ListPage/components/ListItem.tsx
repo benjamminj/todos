@@ -24,6 +24,45 @@ export interface ListItemProps {
   status: ListItemInterface['status']
 }
 
+interface EditItemFormProps {
+  onSubmit: (form: { name: string }) => void
+  name: string
+}
+
+export const EditItemForm: FunctionComponent<EditItemFormProps> = ({
+  onSubmit,
+  name,
+}) => {
+  const [value, setValue] = useState(name)
+
+  const handleSubmit = () => onSubmit({ name: value })
+  return (
+    <form onSubmit={handleSubmit}>
+      <Columns alignY="center">
+        <Column>
+          <Input
+            autoFocus
+            padding="xsmall"
+            css={{
+              margin: spacing.xsmall * -1,
+            }}
+            value={value}
+            onChange={(ev) => setValue(ev.target.value)}
+            label="Name"
+            onBlur={handleSubmit}
+          />
+        </Column>
+
+        <Column width="content">
+          <Fab label={'Done'} type="submit">
+            <CloseIcon css={{ fill: '#999' }} />
+          </Fab>
+        </Column>
+      </Columns>
+    </form>
+  )
+}
+
 export const ListItem: FunctionComponent<ListItemProps> = ({
   name,
   id,
@@ -46,15 +85,16 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
         },
         body: JSON.stringify(update),
       }).then((res) => res.json())
-      // const updatedItem = await ListService.updateListItem(id, update)
 
-      return {
+      const updatedList = {
         ...prevList,
         items:
           prevList.items.map((item) =>
             item.id === updatedItem.id ? updatedItem : item
           ) || [],
       }
+
+      return updatedList
     })
   }
 
@@ -67,36 +107,17 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
         border: '1px solid #eaeaea',
       }}
     >
-      <Columns css={{ alignItems: 'center' }}>
-        <Column>
-          {editing ? (
-            <Input
-              autoFocus
-              padding="xsmall"
-              css={{
-                margin: spacing.xsmall * -1,
-              }}
-              defaultValue={name}
-              label="Name"
-              onBlur={(ev) => {
-                updateItem({
-                  name: ev.target.value,
-                })
-                // const updatedItem = await ListService.updateListItem(id, )
-
-                // return {
-                //   ...prevList,
-                //   items:
-                //     prevList.items.map((item) =>
-                //       item.id === updatedItem.id ? updatedItem : item
-                //     ) || [],
-                // }
-                // })
-
-                setEditing(false)
-              }}
-            />
-          ) : (
+      {editing ? (
+        <EditItemForm
+          onSubmit={(form) => {
+            updateItem(form)
+            setEditing(false)
+          }}
+          name={name}
+        />
+      ) : (
+        <Columns css={{ alignItems: 'center' }}>
+          <Column>
             <Checkbox
               label={name}
               checked={status === 'completed'}
@@ -106,22 +127,18 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
                 updateItem({ status })
               }}
             />
-          )}
-        </Column>
+          </Column>
 
-        <Column width="content" css={{ display: 'flex' }}>
-          <Fab
-            label={editing ? 'Done' : 'Edit'}
-            onClick={() => setEditing((wasEditing) => !wasEditing)}
-          >
-            {editing ? (
-              <CloseIcon css={{ fill: '#999' }} />
-            ) : (
+          <Column width="content" css={{ display: 'flex' }}>
+            <Fab
+              label={editing ? 'Done' : 'Edit'}
+              onClick={() => setEditing((wasEditing) => !wasEditing)}
+            >
               <EditIcon css={{ fill: '#999' }} />
-            )}
-          </Fab>
-        </Column>
-      </Columns>
+            </Fab>
+          </Column>
+        </Columns>
+      )}
     </Card>
   )
 }
