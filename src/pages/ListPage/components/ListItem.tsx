@@ -75,7 +75,31 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
   })
 
   const updateItem = (update: Partial<ListItemInterface>) => {
+    // optimistic update
+    mutate((prevList) => {
+      if (!prevList) return
+
+      const updatedItem = {
+        name,
+        id,
+        listId,
+        status,
+        ...update,
+      }
+
+      const updatedList = {
+        ...prevList,
+        items:
+          prevList.items.map((item: ListItemInterface) =>
+            item.id === updatedItem.id ? updatedItem : item
+          ) || [],
+      }
+
+      return updatedList
+    })
+
     mutate(async (prevList) => {
+      console.log('RUN ACTUAL')
       if (!prevList) return
 
       const updatedItem = await fetch(`/api/lists/${listId}/items/${id}`, {

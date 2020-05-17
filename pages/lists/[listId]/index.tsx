@@ -1,4 +1,1 @@
-export {
-  ListPage as default,
-  getServerSideProps,
-} from '../../../src/pages/ListPage'
+export { ListPage as default } from '../../../src/pages/ListPage'
