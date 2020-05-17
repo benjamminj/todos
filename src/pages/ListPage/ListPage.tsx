@@ -13,23 +13,27 @@ import { AddListItem } from './components/AddListItem'
 import { Text } from '../../components/Text'
 import { VisuallyHidden } from '../../components/VisuallyHidden'
 import { fetch } from '../../lib/fetch'
+import { useRouter } from 'next/router'
 /** @jsx jsx */ jsx
 
 interface ListPageProps {
   id: string
 }
 
-export const ListPage: FunctionComponent<ListPageProps> = ({ id }) => {
+export const ListPage: FunctionComponent<ListPageProps> = () => {
+  const router = useRouter()
+  const id = router.query.listId as string
+
   const fetchItems = useCallback(async () => {
     const list = await fetch(`/api/lists/${id}?expand=items`).then((res) =>
       res.json()
     )
 
     return list
-  }, [])
+  }, [id])
 
   const { data: list, status: listStatus } = useQuery<Required<List>>(
-    `/lists/${id}`,
+    id ? `/lists/${id}` : null,
     fetchItems
   )
 

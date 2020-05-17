@@ -75,6 +75,30 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
   })
 
   const updateItem = (update: Partial<ListItemInterface>) => {
+    // optimistic update
+    mutate((prevList) => {
+      if (!prevList) return
+
+      const updatedItem = {
+        name,
+        id,
+        listId,
+        status,
+        ...update,
+      }
+
+      const updatedList = {
+        ...prevList,
+        items:
+          prevList.items.map((item: ListItemInterface) =>
+            item.id === updatedItem.id ? updatedItem : item
+          ) || [],
+      }
+
+      return updatedList
+    })
+
+    // actual update
     mutate(async (prevList) => {
       if (!prevList) return
 
@@ -89,7 +113,7 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
       const updatedList = {
         ...prevList,
         items:
-          prevList.items.map((item) =>
+          prevList.items.map((item: ListItemInterface) =>
             item.id === updatedItem.id ? updatedItem : item
           ) || [],
       }
