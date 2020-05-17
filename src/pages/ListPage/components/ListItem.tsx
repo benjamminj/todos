@@ -98,8 +98,8 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
       return updatedList
     })
 
+    // actual update
     mutate(async (prevList) => {
-      console.log('RUN ACTUAL')
       if (!prevList) return
 
       const updatedItem = await fetch(`/api/lists/${listId}/items/${id}`, {
@@ -113,7 +113,7 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
       const updatedList = {
         ...prevList,
         items:
-          prevList.items.map((item) =>
+          prevList.items.map((item: ListItemInterface) =>
             item.id === updatedItem.id ? updatedItem : item
           ) || [],
       }

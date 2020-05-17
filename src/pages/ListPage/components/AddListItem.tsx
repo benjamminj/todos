@@ -6,7 +6,7 @@ import { Box } from '../../../components/Box'
 import { Fab } from '../../../components/Fab'
 import { Input } from '../../../components/Input'
 import { PlusIcon } from '../../../components/PlusIcon'
-import { List } from '../../../modules/lists/types'
+import { List, ListItem } from '../../../modules/lists/types'
 import { spacing } from '../../../styles/spacing'
 /** @jsx jsx */ jsx
 
@@ -26,6 +26,24 @@ export const AddListItem: FunctionComponent<AddItemProps> = ({ listId }) => {
         onSubmit={(ev) => {
           ev.preventDefault()
 
+          const newItem: ListItem = {
+            id: '',
+            listId,
+            name,
+            status: 'todo',
+          }
+
+          // optimistic update
+          mutate((prevList) => {
+            if (!prevList) return null
+            return {
+              ...prevList,
+              itemIds: [...(prevList.itemIds || [])],
+              items: [newItem, ...(prevList.items || [])],
+            } as Required<List>
+          })
+
+          // actual API update
           mutate(async (prevList) => {
             if (!prevList) return null
 
