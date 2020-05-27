@@ -71,13 +71,13 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
 }) => {
   const [editing, setEditing] = useState(false)
   const { mutate } = useMutation<Required<List> | undefined>({
-    key: `/lists/${listId}`,
+    key: `/lists/${listId}/items`,
   })
 
   const updateItem = (update: Partial<ListItemInterface>) => {
     // optimistic update
-    mutate((prevList) => {
-      if (!prevList) return
+    mutate((prevItems) => {
+      if (!prevItems) return
 
       const updatedItem = {
         name,
@@ -87,20 +87,17 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
         ...update,
       }
 
-      const updatedList = {
-        ...prevList,
-        items:
-          prevList.items.map((item: ListItemInterface) =>
-            item.id === updatedItem.id ? updatedItem : item
-          ) || [],
-      }
+      const updatedItems =
+        prevItems.map((item: ListItemInterface) =>
+          item.id === updatedItem.id ? updatedItem : item
+        ) || []
 
-      return updatedList
+      return updatedItems
     })
 
     // actual update
-    mutate(async (prevList) => {
-      if (!prevList) return
+    mutate(async (prevItems) => {
+      if (!prevItems) return
 
       const updatedItem = await fetch(`/api/lists/${listId}/items/${id}`, {
         method: 'PATCH',
@@ -110,15 +107,12 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
         body: JSON.stringify(update),
       }).then((res) => res.json())
 
-      const updatedList = {
-        ...prevList,
-        items:
-          prevList.items.map((item: ListItemInterface) =>
-            item.id === updatedItem.id ? updatedItem : item
-          ) || [],
-      }
+      const updatedItems =
+        prevItems.map((item: ListItemInterface) =>
+          item.id === updatedItem.id ? updatedItem : item
+        ) || []
 
-      return updatedList
+      return updatedItems
     })
   }
 

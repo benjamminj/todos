@@ -2,7 +2,7 @@ import { GetServerSideProps } from 'next'
 import { Box } from '../../components/Box'
 import { Columns } from '../../components/Columns'
 import { Column } from '../../components/Column'
-import { List } from '../../modules/lists/types'
+import { List, ListItem as ListItemInterface } from '../../modules/lists/types'
 import { FunctionComponent, useCallback } from 'react'
 import { jsx } from '@emotion/core'
 import { Stack } from '../../components/Stack'
@@ -24,16 +24,26 @@ export const ListPage: FunctionComponent<ListPageProps> = () => {
   const router = useRouter()
   const id = router.query.listId as string
 
-  const fetchItems = useCallback(async () => {
-    const list = await fetch(`/api/lists/${id}?expand=items`).then((res) =>
-      res.json()
-    )
+  const fetchList = useCallback(async () => {
+    const list = await fetch(`/api/lists/${id}`).then((res) => res.json())
 
     return list
   }, [id])
 
+  const fetchItems = useCallback(async () => {
+    const items = await fetch(`/api/lists/${id}/items`).then((res) =>
+      res.json()
+    )
+    return items
+  }, [id])
+
   const { data: list, status: listStatus } = useQuery<Required<List>>(
     id ? `/lists/${id}` : null,
+    fetchList
+  )
+
+  const { data: items, status: itemsStatus } = useQuery<ListItemInterface[]>(
+    id ? `/lists/${id}/items` : null,
     fetchItems
   )
 
@@ -59,8 +69,8 @@ export const ListPage: FunctionComponent<ListPageProps> = () => {
 
         <Box paddingTop="medium">
           <Stack space="xsmall">
-            {listStatus === 'loading' && 'Loading...'}
-            {listStatus === 'success' && (list?.items?.length ?? 0) === 0 && (
+            {itemsStatus === 'loading' && 'Loading...'}
+            {itemsStatus === 'success' && (items?.length ?? 0) === 0 && (
               <Box
                 padding="medium"
                 css={{ display: 'flex', justifyContent: 'center' }}
@@ -69,8 +79,8 @@ export const ListPage: FunctionComponent<ListPageProps> = () => {
               </Box>
             )}
 
-            {listStatus === 'success' &&
-              list?.items?.map((item) => (
+            {itemsStatus === 'success' &&
+              items?.map((item) => (
                 <ListItem
                   name={item.name}
                   key={item.id}

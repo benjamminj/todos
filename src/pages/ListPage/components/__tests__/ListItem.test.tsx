@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, fireEvent } from '@testing-library/react'
+import { render, fireEvent, waitFor } from '@testing-library/react'
 import { ListItem } from '../ListItem'
 import { CacheContextProvider } from 'rhdf'
 import { ListItem as ListItemInterface } from '../../../../modules/lists/types'
@@ -44,7 +44,9 @@ describe('<ListItem />', () => {
 
   test('should allow you to edit the item', async () => {
     const { getByText, getByLabelText, queryByLabelText } = render(
-      <CacheContextProvider cache={new Map([[`/lists/${listId}`, mockList]])}>
+      <CacheContextProvider
+        cache={new Map([[`/lists/${listId}/items`, mockList.items]])}
+      >
         <ListItem {...mockItem} />
       </CacheContextProvider>
     )
@@ -62,12 +64,18 @@ describe('<ListItem />', () => {
 
     fireEvent.blur($input)
 
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1))
+
     expect(fetch).toHaveBeenCalledTimes(1)
   })
 
   test('should submit the "edit" form when pressing ENTER', async () => {
     const { getByText, getByLabelText, queryByLabelText } = render(
-      <ListItem name="Test" id="0l28pul1z" listId="b9y7rp6wt" status="todo" />
+      <CacheContextProvider
+        cache={new Map([[`/lists/${listId}/items`, mockList.items]])}
+      >
+        <ListItem name="Test" id="0l28pul1z" listId="b9y7rp6wt" status="todo" />
+      </CacheContextProvider>
     )
 
     expect(queryByLabelText('Name')).toBeNull()
@@ -82,6 +90,10 @@ describe('<ListItem />', () => {
     expect($input.value).toEqual('Testz')
 
     fireEvent.keyPress($input, { key: 'Enter' })
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledTimes(1)
+    })
 
     expect(fetch).toHaveBeenCalledTimes(1)
   })
