@@ -16,7 +16,7 @@ interface AddItemProps {
 
 export const AddListItem: FunctionComponent<AddItemProps> = ({ listId }) => {
   const { mutate } = useMutation<Required<List> | null>({
-    key: `/lists/${listId}`,
+    key: `/lists/${listId}/items`,
   })
   const [name, setName] = useState('')
 
@@ -25,27 +25,24 @@ export const AddListItem: FunctionComponent<AddItemProps> = ({ listId }) => {
       <form
         onSubmit={(ev) => {
           ev.preventDefault()
-
-          const newItem: ListItem = {
-            id: '',
-            listId,
-            name,
-            status: 'todo',
-          }
+          if (!name) return
 
           // optimistic update
-          mutate((prevList) => {
-            if (!prevList) return null
-            return {
-              ...prevList,
-              itemIds: [...(prevList.itemIds || [])],
-              items: [newItem, ...(prevList.items || [])],
-            } as Required<List>
+          mutate((prevItems) => {
+            if (!prevItems) return null
+            const newItem: ListItem = {
+              id: `OPTIMISTIC_${name}`,
+              listId,
+              name,
+              status: 'todo',
+            }
+
+            return [newItem, ...(prevItems || [])] as Required<ListItem[]>
           })
 
           // actual API update
-          mutate(async (prevList) => {
-            if (!prevList) return null
+          mutate(async (prevItems) => {
+            if (!prevItems) return null
 
             const newItem = await fetch(`/api/lists/${listId}/items`, {
               method: 'POST',
@@ -55,11 +52,12 @@ export const AddListItem: FunctionComponent<AddItemProps> = ({ listId }) => {
               body: JSON.stringify({ name }),
             }).then((res) => res.json())
 
-            return {
-              ...prevList,
-              itemIds: [newItem.id, ...(prevList.itemIds || [])],
-              items: [newItem, ...(prevList.items || [])],
-            } as Required<List>
+            return [
+              newItem,
+              ...prevItems.filter(
+                (item: ListItem) => item.id !== `OPTIMISTIC_${name}`
+              ),
+            ]
           })
 
           setName('')
