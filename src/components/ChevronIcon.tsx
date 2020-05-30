@@ -1,4 +1,4 @@
-import { FunctionComponent, SVGProps } from 'react'
+import React, { FunctionComponent, SVGProps } from 'react'
 
 export const ChevronIcon: FunctionComponent<SVGProps<SVGSVGElement>> = (
   props
