@@ -90,7 +90,6 @@ export class ListService {
     }
   }
 
-  // TODO:
   static async getListItems(listId: string) {
     try {
       await client.query(q.Get(q.Ref(q.Collection('lists'), listId)))
@@ -123,7 +122,6 @@ export class ListService {
     const id = await client.query(q.NewId())
 
     try {
-      // TODO: see if this can be combined into a single query
       const itemIds = await client.query<string[]>(
         q.Select(
           ['data', 'itemIds'],
@@ -155,7 +153,6 @@ export class ListService {
     }
   }
 
-  // TODO: remove need to pass in list id
   static async updateListItem(
     itemId: string,
     updates: Partial<Pick<ListItem, 'name' | 'status'>>

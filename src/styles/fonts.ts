@@ -1,6 +1,5 @@
 export const fontConfig = {
   baseRows: 4,
-  // TODO: better way to store values?
   primary:
     '-apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, sans-serif',
   secondary:

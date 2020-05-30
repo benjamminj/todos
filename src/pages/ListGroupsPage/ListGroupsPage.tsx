@@ -67,7 +67,6 @@ export const ListGroupsPage: FunctionComponent<Props> = ({ lists }) => {
           ))}
         </Stack>
 
-        {/* TODO: sticky on the bottom of the page? */}
         <Box
           paddingTop="large"
           onClick={() => {

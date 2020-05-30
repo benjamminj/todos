@@ -12,7 +12,6 @@ export const handler: NextApiHandler = async (req, res) => {
     const payload = req.body
 
     if (!payload.name || !payload.colorScheme) {
-      // TODO: more robust error messaging. Might need a standardized error fn.
       return res.status(400).json({ message: 'Missing required fields' })
     }
 

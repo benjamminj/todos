@@ -86,7 +86,6 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
   const [editing, setEditing] = useState(false)
 
   const [mutate] = useMutation(
-    // TODO: should this be in a useCallback?
     (update: Partial<ListItemInterface>) => updateItem(listId, id, update),
     {
       onMutate: (update) => {

@@ -42,12 +42,8 @@ describe('E2E', () => {
     cy.findByLabelText('Select a color').select('Purple')
     cy.findByText('Create').click()
 
-    cy.findByText('No items yet!').should('be.visible')
+    cy.findByText('No items yet.', { exact: false }).should('be.visible')
     cy.findByText('Test Addition').should('be.visible')
-
-    // TODO: allow retry?
-    // Or maybe wait _until_ we actually have the list in the BE.
-    cy.wait(500)
 
     cy.wrap(['First', 'Second', 'Third']).each((item: string) => {
       cy.findByLabelText('Add an item').type(item)
@@ -142,9 +138,6 @@ describe('E2E', () => {
       })
     })
 
-    // TODO: might need to scale this up once we have a DB, will need to seed it
-    // via the API
-    // const listId = 'pu74257m9'
     cy.get<string>('@createdListId').then((listId) => {
       cy.visit(`/lists/${listId}`)
     })
