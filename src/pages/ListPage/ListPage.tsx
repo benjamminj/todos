@@ -73,12 +73,20 @@ export const ListItems: FunctionComponent = () => {
 }
 
 type FetchListFn = (key: string, id: string) => Promise<List>
+
+/**
+ * Fetch the data for a single list. This data does _not_ include the list items,
+ * just the list metadata (name, color scheme, etc).
+ */
 const fetchList: FetchListFn = async (_key, id) => {
   const list = await fetch(`/api/lists/${id}`).then((res) => res.json())
 
   return list
 }
 
+/**
+ * "Profile" page for a list of todo items.
+ */
 export const ListPage: FunctionComponent<ListPageProps> = () => {
   const router = useRouter()
   const id = router.query.listId as string
