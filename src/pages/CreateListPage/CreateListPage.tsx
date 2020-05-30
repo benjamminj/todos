@@ -14,6 +14,7 @@ import { Text } from '../../components/Text'
 import { VisuallyHidden } from '../../components/VisuallyHidden'
 import { fetch } from '../../lib/fetch'
 import { List, listColors, ListColorScheme } from '../../modules/lists/types'
+import { getListByIdKey } from '../../modules/lists/queryCacheKeys'
 /** @jsx jsx */ jsx
 
 type CreateListFn = (newList: {
@@ -60,7 +61,7 @@ export const CreateListPage = () => {
     onSuccess: (data) => {
       // Seed the cache with the newly created list before navigation, this prevents
       // us from having to refetch it on the next page.
-      queryCache.setQueryData(['lists', data.id], data)
+      queryCache.setQueryData(getListByIdKey(data.id), data)
       // Automatically navigate to the list's profile
       Router.push('/lists/[listId]', `/lists/${data.id}`)
     },

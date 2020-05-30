@@ -13,6 +13,10 @@ import { fetch } from '../../lib/fetch'
 import { List, ListItem as ListItemInterface } from '../../modules/lists/types'
 import { AddListItem } from './components/AddListItem'
 import { ListItem } from './components/ListItem'
+import {
+  getListByIdKey,
+  getListItemsKey,
+} from '../../modules/lists/queryCacheKeys'
 /** @jsx jsx */ jsx
 
 interface ListPageProps {
@@ -29,7 +33,7 @@ export const ListItems: FunctionComponent = () => {
   const router = useRouter()
   const id = router.query.listId as string | undefined
 
-  const itemsQuery = useQuery(id ? ['listItems', id] : null, fetchItems)
+  const itemsQuery = useQuery(id ? getListItemsKey(id) : null, fetchItems)
 
   if (!id) return null
 
@@ -79,7 +83,7 @@ export const ListPage: FunctionComponent<ListPageProps> = () => {
   const router = useRouter()
   const id = router.query.listId as string
 
-  const listQuery = useQuery(id ? ['lists', id] : null, fetchList)
+  const listQuery = useQuery(id ? getListByIdKey(id) : null, fetchList)
 
   return (
     <Box css={{ backgroundColor: '#fafafa', minHeight: '100vh' }}>

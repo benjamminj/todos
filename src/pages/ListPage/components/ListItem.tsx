@@ -12,6 +12,7 @@ import { Input } from '../../../components/Input'
 import { fetch } from '../../../lib/fetch'
 import { ListItem as ListItemInterface } from '../../../modules/lists/types'
 import { spacing } from '../../../styles/spacing'
+import { getListItemsKey } from '../../../modules/lists/queryCacheKeys'
 /** @jsx jsx */ jsx
 
 export interface ListItemProps {
@@ -89,21 +90,19 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
     (update: Partial<ListItemInterface>) => updateItem(listId, id, update),
     {
       onMutate: (update) => {
-        queryCache.cancelQueries(['listItems', listId])
-        const previousItems = queryCache.getQueryData(['listItems', listId])
+        const cacheKey = getListItemsKey(listId)
+        queryCache.cancelQueries(cacheKey)
+        const previousItems = queryCache.getQueryData(cacheKey)
 
-        queryCache.setQueryData(
-          ['listItems', listId],
-          (oldItems?: ListItemInterface[]) => {
-            if (!oldItems) return []
-            return oldItems.map((item) =>
-              item.id === id ? { ...item, ...update } : item
-            )
-          }
-        )
+        queryCache.setQueryData(cacheKey, (oldItems?: ListItemInterface[]) => {
+          if (!oldItems) return []
+          return oldItems.map((item) =>
+            item.id === id ? { ...item, ...update } : item
+          )
+        })
 
         return () => {
-          return queryCache.setQueryData(['listItems', listId], previousItems)
+          return queryCache.setQueryData(cacheKey, previousItems)
         }
       },
       onError: (_err, _variables, rollback) => {
@@ -112,7 +111,7 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
         }
       },
       onSettled: () => {
-        queryCache.refetchQueries(['listItems', listId])
+        queryCache.refetchQueries(getListItemsKey(listId))
       },
     }
   )

@@ -8,6 +8,7 @@ import { PlusIcon } from '../../../components/PlusIcon'
 import { ListItem as ListItemInterface } from '../../../modules/lists/types'
 import { spacing } from '../../../styles/spacing'
 import { useMutation, queryCache } from 'react-query'
+import { getListItemsKey } from '../../../modules/lists/queryCacheKeys'
 /** @jsx jsx */ jsx
 
 interface AddItemProps {
@@ -39,8 +40,9 @@ export const AddListItem: FunctionComponent<AddItemProps> = ({ listId }) => {
     ({ name }: { name: string }) => addListItem(listId, name),
     {
       onMutate: ({ name }) => {
-        queryCache.cancelQueries(['listItems', listId])
-        const previousItems = queryCache.getQueryData(['listItems', listId])
+        const cacheKey = getListItemsKey(listId)
+        queryCache.cancelQueries(cacheKey)
+        const previousItems = queryCache.getQueryData(cacheKey)
 
         const newItem: ListItemInterface = {
           id: `OPTIMISTIC_${name}`,
@@ -49,16 +51,13 @@ export const AddListItem: FunctionComponent<AddItemProps> = ({ listId }) => {
           status: 'todo',
         }
 
-        queryCache.setQueryData(
-          ['listItems', listId],
-          (oldItems?: ListItemInterface[]) => {
-            if (!oldItems) return [newItem]
-            return [newItem, ...oldItems]
-          }
-        )
+        queryCache.setQueryData(cacheKey, (oldItems?: ListItemInterface[]) => {
+          if (!oldItems) return [newItem]
+          return [newItem, ...oldItems]
+        })
 
         return () => {
-          return queryCache.setQueryData(['listItems', listId], previousItems)
+          return queryCache.setQueryData(cacheKey, previousItems)
         }
       },
       onError: (_err, _variables, rollback) => {
@@ -67,7 +66,7 @@ export const AddListItem: FunctionComponent<AddItemProps> = ({ listId }) => {
         }
       },
       onSettled: () => {
-        queryCache.refetchQueries(['listItems', listId])
+        queryCache.refetchQueries(getListItemsKey(listId))
       },
     }
   )
