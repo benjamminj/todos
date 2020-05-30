@@ -1,24 +1,76 @@
 import { jsx } from '@emotion/core'
 import { fetch } from '../../../lib/fetch'
 import { FunctionComponent, useState } from 'react'
-import { useMutation } from 'rhdf'
 import { Box } from '../../../components/Box'
 import { Fab } from '../../../components/Fab'
 import { Input } from '../../../components/Input'
 import { PlusIcon } from '../../../components/PlusIcon'
-import { List, ListItem } from '../../../modules/lists/types'
+import {
+  List,
+  ListItem as ListItemInterface,
+} from '../../../modules/lists/types'
 import { spacing } from '../../../styles/spacing'
+import { useMutation, queryCache } from 'react-query'
 /** @jsx jsx */ jsx
 
 interface AddItemProps {
   listId: string
 }
 
+type AddListItemFn = (listId: string, name: string) => Promise<void>
+
+/**
+ * Make an API call to add an todo list item to the list with the given id.
+ */
+const addListItem: AddListItemFn = async (listId, name) => {
+  await fetch(`/api/lists/${listId}/items`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ name }),
+  }).then((res) => res.json())
+}
+
 export const AddListItem: FunctionComponent<AddItemProps> = ({ listId }) => {
-  const { mutate } = useMutation<Required<List> | null>({
-    key: `/lists/${listId}/items`,
-  })
   const [name, setName] = useState('')
+
+  const [mutate] = useMutation(
+    ({ name }: { name: string }) => addListItem(listId, name),
+    {
+      onMutate: ({ name }) => {
+        queryCache.cancelQueries(['listItems', listId])
+        const previousItems = queryCache.getQueryData(['listItems', listId])
+
+        const newItem: ListItemInterface = {
+          id: `OPTIMISTIC_${name}`,
+          listId,
+          name,
+          status: 'todo',
+        }
+
+        queryCache.setQueryData(
+          ['listItems', listId],
+          (oldItems?: ListItemInterface[]) => {
+            if (!oldItems) return [newItem]
+            return [newItem, ...oldItems]
+          }
+        )
+
+        return () => {
+          return queryCache.setQueryData(['listItems', listId], previousItems)
+        }
+      },
+      onError: (_err, _variables, rollback) => {
+        if (typeof rollback === 'function') {
+          rollback()
+        }
+      },
+      onSettled: () => {
+        queryCache.refetchQueries(['listItems', listId])
+      },
+    }
+  )
 
   return (
     <Box css={{ position: 'relative' }}>
@@ -26,40 +78,7 @@ export const AddListItem: FunctionComponent<AddItemProps> = ({ listId }) => {
         onSubmit={(ev) => {
           ev.preventDefault()
           if (!name) return
-
-          // optimistic update
-          mutate((prevItems) => {
-            if (!prevItems) return null
-            const newItem: ListItem = {
-              id: `OPTIMISTIC_${name}`,
-              listId,
-              name,
-              status: 'todo',
-            }
-
-            return [newItem, ...(prevItems || [])] as Required<ListItem[]>
-          })
-
-          // actual API update
-          mutate(async (prevItems) => {
-            if (!prevItems) return null
-
-            const newItem = await fetch(`/api/lists/${listId}/items`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ name }),
-            }).then((res) => res.json())
-
-            return [
-              newItem,
-              ...prevItems.filter(
-                (item: ListItem) => item.id !== `OPTIMISTIC_${name}`
-              ),
-            ]
-          })
-
+          mutate({ name })
           setName('')
         }}
       >

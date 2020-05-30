@@ -1,8 +1,7 @@
 import { jsx } from '@emotion/core'
-import { GetServerSideProps } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { FunctionComponent, useCallback } from 'react'
+import { FunctionComponent } from 'react'
 import { useQuery } from 'react-query'
 import { Box } from '../../components/Box'
 import { Column } from '../../components/Column'
@@ -108,15 +107,4 @@ export const ListPage: FunctionComponent<ListPageProps> = () => {
       </Box>
     </Box>
   )
-}
-
-export const getServerSideProps: GetServerSideProps<ListPageProps> = async (
-  ctx
-) => {
-  return {
-    props: {
-      id: ctx.query.listId as string,
-      // list,
-    },
-  }
 }

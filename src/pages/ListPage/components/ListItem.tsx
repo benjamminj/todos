@@ -107,8 +107,9 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
           }
         )
 
-        return () =>
-          queryCache.setQueryData(['listItems', listId], previousItems)
+        return () => {
+          return queryCache.setQueryData(['listItems', listId], previousItems)
+        }
       },
       onError: (_err, _variables, rollback) => {
         if (typeof rollback === 'function') {
