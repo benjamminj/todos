@@ -5,10 +5,7 @@ import { Box } from '../../../components/Box'
 import { Fab } from '../../../components/Fab'
 import { Input } from '../../../components/Input'
 import { PlusIcon } from '../../../components/PlusIcon'
-import {
-  List,
-  ListItem as ListItemInterface,
-} from '../../../modules/lists/types'
+import { ListItem as ListItemInterface } from '../../../modules/lists/types'
 import { spacing } from '../../../styles/spacing'
 import { useMutation, queryCache } from 'react-query'
 /** @jsx jsx */ jsx
@@ -32,6 +29,9 @@ const addListItem: AddListItemFn = async (listId, name) => {
   }).then((res) => res.json())
 }
 
+/**
+ * A form which, when submitted, adds a list item to the given list id.
+ */
 export const AddListItem: FunctionComponent<AddItemProps> = ({ listId }) => {
   const [name, setName] = useState('')
 
