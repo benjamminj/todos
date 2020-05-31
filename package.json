@@ -13,7 +13,8 @@
     "e2e:open": "yarn cypress open",
     "migrate:make": "yarn migrate --compiler=\"ts:./migrate-compiler.js\" --store=\"./migrate-store.ts\" create",
     "migrate:up": "yarn migrate --compiler=\"ts:./migrate-compiler.js\" --store=\"./migrate-store.ts\" up",
-    "migrate:down": "yarn migrate --compiler=\"ts:./migrate-compiler.js\" --store=\"./migrate-store.ts\" down"
+    "migrate:down": "yarn migrate --compiler=\"ts:./migrate-compiler.js\" --store=\"./migrate-store.ts\" down",
+    "migrate:list": "yarn migrate --compiler=\"ts:./migrate-compiler.js\" --store=\"./migrate-store.ts\" list"
   },
   "dependencies": {
     "@emotion/core": "^10.0.28",

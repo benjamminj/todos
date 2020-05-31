@@ -3,6 +3,7 @@ import { List, ListItem } from '../../src/modules/lists/types'
 describe('API', () => {
   beforeEach(() => {
     cy.server()
+    cy.task('clearDatabase')
   })
 
   context('GET /api/lists', () => {

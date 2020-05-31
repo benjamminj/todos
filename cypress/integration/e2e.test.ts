@@ -3,6 +3,7 @@ import { List } from '../../src/modules/lists/types'
 describe('E2E', () => {
   beforeEach(() => {
     cy.server()
+    cy.task('clearDatabase')
     cy.viewport('iphone-x')
   })
 
