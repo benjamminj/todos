@@ -7,8 +7,6 @@ describe('API', () => {
 
   context('GET /api/lists', () => {
     it('should be able to fetch a list of lists', () => {
-      // TODO: will need to reach into DB and seed / delete lists in order to do more testing?
-
       cy.request('/api/lists').then((response) => {
         expect(response.status).equals(200)
         expect(response.body).to.be.an('array')

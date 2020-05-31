@@ -1,7 +1,6 @@
 import React from 'react'
 import { render, fireEvent, waitFor } from '@testing-library/react'
 import { ListItem } from '../ListItem'
-import { CacheContextProvider } from 'rhdf'
 import { ListItem as ListItemInterface } from '../../../../modules/lists/types'
 import { fetch } from '../../../../lib/fetch'
 
@@ -44,11 +43,7 @@ describe('<ListItem />', () => {
 
   test('should allow you to edit the item', async () => {
     const { getByText, getByLabelText, queryByLabelText } = render(
-      <CacheContextProvider
-        cache={new Map([[`/lists/${listId}/items`, mockList.items]])}
-      >
-        <ListItem {...mockItem} />
-      </CacheContextProvider>
+      <ListItem {...mockItem} />
     )
 
     expect(queryByLabelText('Name')).toBeNull()
@@ -71,11 +66,7 @@ describe('<ListItem />', () => {
 
   test('should submit the "edit" form when pressing ENTER', async () => {
     const { getByText, getByLabelText, queryByLabelText } = render(
-      <CacheContextProvider
-        cache={new Map([[`/lists/${listId}/items`, mockList.items]])}
-      >
-        <ListItem name="Test" id="0l28pul1z" listId="b9y7rp6wt" status="todo" />
-      </CacheContextProvider>
+      <ListItem name="Test" id="0l28pul1z" listId="b9y7rp6wt" status="todo" />
     )
 
     expect(queryByLabelText('Name')).toBeNull()

@@ -1,9 +1,8 @@
 import { jsx } from '@emotion/core'
 import Link from 'next/link'
-import { fetch } from '../../lib/fetch'
 import Router from 'next/router'
-import { useState } from 'react'
-import { useMutation } from 'rhdf'
+import React, { useState } from 'react'
+import { queryCache, useMutation } from 'react-query'
 import { Box } from '../../components/Box'
 import { Button } from '../../components/Button'
 import { Column } from '../../components/Column'
@@ -13,15 +12,59 @@ import { Select } from '../../components/Select'
 import { Stack } from '../../components/Stack'
 import { Text } from '../../components/Text'
 import { VisuallyHidden } from '../../components/VisuallyHidden'
+import { fetch } from '../../lib/fetch'
 import { List, listColors, ListColorScheme } from '../../modules/lists/types'
+import { getListByIdKey } from '../../modules/lists/queryCacheKeys'
 /** @jsx jsx */ jsx
 
+type CreateListFn = (newList: {
+  name: string
+  colorScheme: string
+}) => Promise<List>
+
+/**
+ * Saves a new list to the database.
+ *
+ * New lists will be defaulted with 0 items
+ */
+const createList: CreateListFn = async ({ name, colorScheme }) => {
+  const list = await fetch(`/api/lists`, {
+    method: 'post',
+    mode: 'same-origin',
+    headers: {
+      Accept: '*/*',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ name, colorScheme }),
+  }).then((res) => {
+    if (res.status >= 400) {
+      throw new Error(`Failed to fetch: responded with status ${res.status}`)
+    }
+
+    return res.json()
+  })
+
+  return list
+}
+
+/**
+ * Form to facilitate adding a brand new list.
+ *
+ * Should immediately redirect to the view of the list itself upon successfully
+ * completing the form.
+ */
 export const CreateListPage = () => {
   const [name, setName] = useState('')
   const [colorScheme, setColorScheme] = useState<ListColorScheme | ''>('')
 
-  const { mutate } = useMutation<List>({
-    onSuccess: (data, cache) => cache.set(`/lists/${data.id}`, data),
+  const [mutate] = useMutation(createList, {
+    onSuccess: (data) => {
+      // Seed the cache with the newly created list before navigation, this prevents
+      // us from having to refetch it on the next page.
+      queryCache.setQueryData(getListByIdKey(data.id), data)
+      // Automatically navigate to the list's profile
+      Router.push('/lists/[listId]', `/lists/${data.id}`)
+    },
   })
 
   return (
@@ -47,31 +90,9 @@ export const CreateListPage = () => {
           onSubmit={async (ev) => {
             ev.preventDefault()
 
-            // TODO: error validation / handling?
             if (!name || !colorScheme) return
 
-            // TODO: some generic fetch utilities?
-            const list = await fetch(`/api/lists`, {
-              method: 'post',
-              mode: 'same-origin',
-              headers: {
-                Accept: '*/*',
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ name, colorScheme }),
-            }).then((res) => {
-              if (res.status >= 300) {
-                throw new Error(
-                  `Failed to fetch: responded with status ${res.status}`
-                )
-              }
-
-              return res.json()
-            })
-
-            mutate(() => ({ ...list, items: [], itemIds: [] }))
-
-            Router.push('/lists/[listId]', `/lists/${list.id}`)
+            mutate({ name, colorScheme })
           }}
         >
           <Stack space="small">

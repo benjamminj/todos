@@ -1,20 +1,18 @@
 import { jsx } from '@emotion/core'
+import { FunctionComponent, useState } from 'react'
+import { queryCache, useMutation } from 'react-query'
 import { Card } from '../../../components/Card'
+import { Checkbox } from '../../../components/Checkbox'
+import { CloseIcon } from '../../../components/CloseIcon'
 import { Column } from '../../../components/Column'
 import { Columns } from '../../../components/Columns'
 import { EditIcon } from '../../../components/EditIcon'
 import { Fab } from '../../../components/Fab/Fab'
-import { spacing } from '../../../styles/spacing'
-import { FunctionComponent, useState } from 'react'
 import { Input } from '../../../components/Input'
-import { CloseIcon } from '../../../components/CloseIcon'
-import { useMutation } from 'rhdf'
-import {
-  List,
-  ListItem as ListItemInterface,
-} from '../../../modules/lists/types'
-import { Checkbox } from '../../../components/Checkbox'
 import { fetch } from '../../../lib/fetch'
+import { ListItem as ListItemInterface } from '../../../modules/lists/types'
+import { spacing } from '../../../styles/spacing'
+import { getListItemsKey } from '../../../modules/lists/queryCacheKeys'
 /** @jsx jsx */ jsx
 
 export interface ListItemProps {
@@ -63,6 +61,23 @@ export const EditItemForm: FunctionComponent<EditItemFormProps> = ({
   )
 }
 
+type UpdateItemFn = (
+  listId: string,
+  itemId: string,
+  update: Partial<ListItemInterface>
+) => Promise<ListItemInterface>
+
+const updateItem: UpdateItemFn = async (listId, itemId, update) => {
+  const updatedItem = await fetch(`/api/lists/${listId}/items/${itemId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(update),
+  }).then((res) => res.json())
+  return updatedItem
+}
+
 export const ListItem: FunctionComponent<ListItemProps> = ({
   name,
   id,
@@ -70,51 +85,36 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
   status,
 }) => {
   const [editing, setEditing] = useState(false)
-  const { mutate } = useMutation<Required<List> | undefined>({
-    key: `/lists/${listId}/items`,
-  })
 
-  const updateItem = (update: Partial<ListItemInterface>) => {
-    // optimistic update
-    mutate((prevItems) => {
-      if (!prevItems) return
+  const [mutate] = useMutation(
+    (update: Partial<ListItemInterface>) => updateItem(listId, id, update),
+    {
+      onMutate: (update) => {
+        const cacheKey = getListItemsKey(listId)
+        queryCache.cancelQueries(cacheKey)
+        const previousItems = queryCache.getQueryData(cacheKey)
 
-      const updatedItem = {
-        name,
-        id,
-        listId,
-        status,
-        ...update,
-      }
+        queryCache.setQueryData(cacheKey, (oldItems?: ListItemInterface[]) => {
+          if (!oldItems) return []
+          return oldItems.map((item) =>
+            item.id === id ? { ...item, ...update } : item
+          )
+        })
 
-      const updatedItems =
-        prevItems.map((item: ListItemInterface) =>
-          item.id === updatedItem.id ? updatedItem : item
-        ) || []
-
-      return updatedItems
-    })
-
-    // actual update
-    mutate(async (prevItems) => {
-      if (!prevItems) return
-
-      const updatedItem = await fetch(`/api/lists/${listId}/items/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(update),
-      }).then((res) => res.json())
-
-      const updatedItems =
-        prevItems.map((item: ListItemInterface) =>
-          item.id === updatedItem.id ? updatedItem : item
-        ) || []
-
-      return updatedItems
-    })
-  }
+        return () => {
+          return queryCache.setQueryData(cacheKey, previousItems)
+        }
+      },
+      onError: (_err, _variables, rollback) => {
+        if (typeof rollback === 'function') {
+          rollback()
+        }
+      },
+      onSettled: () => {
+        queryCache.refetchQueries(getListItemsKey(listId))
+      },
+    }
+  )
 
   return (
     <Card
@@ -128,7 +128,7 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
       {editing ? (
         <EditItemForm
           onSubmit={(form) => {
-            updateItem(form)
+            mutate(form)
             setEditing(false)
           }}
           name={name}
@@ -142,7 +142,7 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
               onChange={(ev) => {
                 const status = ev.target.checked ? 'completed' : 'todo'
 
-                updateItem({ status })
+                mutate({ status })
               }}
             />
           </Column>

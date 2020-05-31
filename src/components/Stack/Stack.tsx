@@ -1,4 +1,4 @@
-import { ReactNode, FunctionComponent, Children } from 'react'
+import React, { ReactNode, FunctionComponent, Children } from 'react'
 import { SpacingToken } from '../../styles/spacing'
 import { Box, BoxProps } from '../Box'
 

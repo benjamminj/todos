@@ -19,7 +19,6 @@ export const Columns: FunctionComponent<ColumnsProps> = ({
   alignY = 'none',
   ...props
 }) => {
-  // TODO: automagical gutters b/w columns?
   return (
     <Box
       {...props}
