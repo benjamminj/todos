@@ -13,7 +13,28 @@ export class ListService {
   static async getAllLists() {
     const lists = await client.query<{ data: List[] }>(
       q.Map(q.Paginate(q.Match(q.Index('all_lists'))), (ref) =>
-        q.Select('data', q.Get(ref))
+        q.Let(
+          {
+            data: q.Select('data', q.Get(ref)),
+            listId: q.Select('id', q.Var('data')),
+            todoCount: q.Count(
+              q.Match(q.Index('items_by_listId_and_status'), [
+                q.Var('listId'),
+                'todo',
+              ])
+            ),
+            completedCount: q.Count(
+              q.Match(q.Index('items_by_listId_and_status'), [
+                q.Var('listId'),
+                'completed',
+              ])
+            ),
+          },
+          q.Merge(q.Var('data'), {
+            todoCount: q.Var('todoCount'),
+            completedCount: q.Var('completedCount'),
+          })
+        )
       )
     )
 

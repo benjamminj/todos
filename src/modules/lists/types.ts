@@ -39,6 +39,8 @@ export interface List {
   colorScheme: ListColorScheme
   itemIds: string[]
   items?: ListItem[]
+  todoCount?: number
+  completedCount?: number
 }
 
 export interface ListItem {
