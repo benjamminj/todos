@@ -41,26 +41,7 @@ export const ListGroupsPage: FunctionComponent<Props> = ({ lists }) => {
                   css={{ backgroundColor: '#fff' }}
                   data-testid={`ListGroupCard__${list.id}`}
                 >
-                  <Columns css={{ alignItems: 'center' }}>
-                    <Column>
-                      <Text variant="subtitle">{list.name}</Text>
-                    </Column>
-                    <Column width="content">
-                      <Box
-                        css={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderRadius: spacing.large / 2,
-                          height: spacing.large,
-                          width: spacing.large,
-                          background: `rgba(0, 0, 0, 0.1)`,
-                        }}
-                      >
-                        <Text variant="body">{list.itemIds.length}</Text>
-                      </Box>
-                    </Column>
-                  </Columns>
+                  <Text variant="subtitle">{list.name}</Text>
                 </Card>
               </a>
             </Link>

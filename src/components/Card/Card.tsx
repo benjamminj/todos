@@ -13,7 +13,7 @@ export const Card: FunctionComponent<CardProps> = ({ children, ...props }) => {
       {...props}
       padding="medium"
       css={{
-        borderRadius: 16,
+        borderRadius: 8,
         border: '1px solid #dcdcdc',
       }}
     >

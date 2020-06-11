@@ -25,10 +25,13 @@ interface ListPageProps {
 
 type FetchItemsFn = (key: string, id: string) => Promise<ListItemInterface[]>
 const fetchItems: FetchItemsFn = async (_key, id) => {
-  const items = await fetch(`/api/lists/${id}/items`).then((res) => res.json())
+  const items = await fetch(`/api/lists/${id}/items?status=todo`).then((res) => res.json())
   return items
 }
 
+/**
+ * Displays the items in a given list.
+ */
 export const ListItems: FunctionComponent = () => {
   const router = useRouter()
   const id = router.query.listId as string | undefined
