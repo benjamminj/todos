@@ -106,13 +106,13 @@ export class ListService {
     const items = await client.query<{ data: ListItem[] }>(
       q.Map(
         q.Paginate(
-          // TODO: see if this can be refactored
           q.If(
             status === undefined,
             q.Match(q.Index('items_by_listId'), listId),
-            q.Filter(q.Match(q.Index('items_by_listId'), listId), (ref) =>
-              q.Equals(status as ListItem['status'], q.Select(['data', 'status'], q.Get(ref)))
-            )
+            q.Match(q.Index('items_by_listId_and_status'), [
+              listId,
+              status as ListItem['status'],
+            ])
           )
         ),
         (ref) => q.Select('data', q.Get(ref))

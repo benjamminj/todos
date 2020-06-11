@@ -11,7 +11,11 @@ export const handler: NextApiHandler = async (req, res) => {
       const hasValidStatus = status === 'completed' || status === 'todo'
 
       if (status && !hasValidStatus) {
-        return res.status(400).json({ message: 'Value for "status" must be either "completed" or "todo"' })
+        return res
+          .status(400)
+          .json({
+            message: 'Value for "status" must be either "completed" or "todo"',
+          })
       }
 
       const items = await ListService.getListItems(id, { status })
@@ -31,7 +35,7 @@ export const handler: NextApiHandler = async (req, res) => {
       return res.status(400).json({ message: error.message })
     }
 
-    return res.status(500).json({ message: 'Internal server error' })
+    return res.status(500).json({ message: 'Internal server error', error })
   }
 
   return res.status(405).end()
