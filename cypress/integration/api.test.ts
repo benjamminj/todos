@@ -319,6 +319,82 @@ describe('API', () => {
       })
     })
 
+    it("should allow you to filter for 'todo' items", () => {
+      cy.get('@createdListId').then((id) => {
+        cy.wrap(['FIRST', 'SECOND', 'THIRD']).each((itemName) => {
+          cy.request({
+            method: 'POST',
+            url: `/api/lists/${id}/items`,
+            body: { name: itemName },
+          }).then((result) => {
+            cy.wrap(result.body.id).as(`${itemName}__id`)
+          })
+        })
+
+        cy.get('@FIRST__id').then((itemId) => {
+          cy.request({
+            method: 'PATCH',
+            url: `/api/lists/${id}/items/${itemId}`,
+            body: { status: 'completed' },
+          })
+        })
+
+        cy.request({
+          method: 'GET',
+          url: `/api/lists/${id}/items?status=todo`,
+        }).then((response) => {
+          expect(response.body).to.have.length(2)
+          expect(
+            response.body.every((item: ListItem) => item.status === 'todo')
+          ).equals(true)
+        })
+      })
+    })
+
+    it("should allow you to filter for 'completed' items", () => {
+      cy.get('@createdListId').then((id) => {
+        cy.wrap(['FIRST', 'SECOND', 'THIRD']).each((itemName) => {
+          cy.request({
+            method: 'POST',
+            url: `/api/lists/${id}/items`,
+            body: { name: itemName },
+          }).then((result) => {
+            cy.wrap(result.body.id).as(`${itemName}__id`)
+          })
+        })
+
+        cy.get('@FIRST__id').then((itemId) => {
+          cy.request({
+            method: 'PATCH',
+            url: `/api/lists/${id}/items/${itemId}`,
+            body: { status: 'completed' },
+          })
+        })
+
+        cy.request({
+          method: 'GET',
+          url: `/api/lists/${id}/items?status=completed`,
+        }).then((response) => {
+          expect(response.body).to.have.length(1)
+          expect(
+            response.body.every((item: ListItem) => item.status === 'completed')
+          ).equals(true)
+        })
+      })
+    })
+
+    it('should 400 if an invalid status is passed', () => {
+      cy.get('@createdListId').then((id) => {
+        cy.request({
+          method: 'GET',
+          url: `/api/lists/${id}/items?status=potato`,
+          failOnStatusCode: false
+        }).then((response) => {
+          expect(response.status).equals(400)
+        })
+      })
+    })
+
     it('should 404 if no list with the given id exists', () => {
       const id = '12345'
       cy.request({

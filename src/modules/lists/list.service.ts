@@ -90,16 +90,32 @@ export class ListService {
     }
   }
 
-  static async getListItems(listId: string) {
+  static async getListItems(
+    listId: string,
+    filters: { status?: ListItem['status'] } = {}
+  ) {
     try {
       await client.query(q.Get(q.Ref(q.Collection('lists'), listId)))
     } catch (error) {
       if (error.name === 'NotFound') throw NotFoundError
       throw error
     }
+
+    const { status } = filters
+
     const items = await client.query<{ data: ListItem[] }>(
-      q.Map(q.Paginate(q.Match(q.Index('items_by_listId'), listId)), (ref) =>
-        q.Select('data', q.Get(ref))
+      q.Map(
+        q.Paginate(
+          // TODO: see if this can be refactored
+          q.If(
+            status === undefined,
+            q.Match(q.Index('items_by_listId'), listId),
+            q.Filter(q.Match(q.Index('items_by_listId'), listId), (ref) =>
+              q.Equals(status as ListItem['status'], q.Select(['data', 'status'], q.Get(ref)))
+            )
+          )
+        ),
+        (ref) => q.Select('data', q.Get(ref))
       )
     )
 
