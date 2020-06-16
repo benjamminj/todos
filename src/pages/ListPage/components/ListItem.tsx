@@ -138,6 +138,7 @@ export const ListItem: FunctionComponent<ListItemProps> = ({
           <Column>
             <Checkbox
               label={name}
+              value={id}
               checked={status === 'completed'}
               onChange={(ev) => {
                 const status = ev.target.checked ? 'completed' : 'todo'
