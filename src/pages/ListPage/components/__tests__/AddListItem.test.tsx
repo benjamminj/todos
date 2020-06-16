@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, fireEvent, wait, waitFor } from '@testing-library/react'
+import { render, fireEvent, waitFor } from '@testing-library/react'
 import { AddListItem } from '../AddListItem'
 import { queryCache, AnyQueryKey } from 'react-query'
 import fetch from 'isomorphic-unfetch'

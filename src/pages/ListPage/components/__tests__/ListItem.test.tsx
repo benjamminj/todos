@@ -25,13 +25,6 @@ const mockItem: ListItemInterface = {
   name: 'Test',
   description: null,
 }
-const mockList = {
-  id: '1234',
-  name: 'mock list',
-  colorScheme: 'red',
-  itemIds: [mockItem.id],
-  items: [mockItem],
-}
 
 describe('<ListItem />', () => {
   test('should render the list item', () => {
