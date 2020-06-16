@@ -15,6 +15,16 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands'
+import unfetch from 'isomorphic-unfetch/browser'
+
+Cypress.on('window:before:load', win => {
+  fetch('https://unpkg.com/unfetch/dist/unfetch.umd.js')
+    .then(stream => stream.text())
+    .then(response => {
+      win.eval(response)
+      win.fetch = win.unfetch
+    })
+})
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

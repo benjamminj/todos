@@ -25,8 +25,11 @@ interface ListPageProps {
 
 type FetchItemsFn = (key: string, id: string) => Promise<ListItemInterface[]>
 const fetchItems: FetchItemsFn = async (_key, id) => {
-  const items = await fetch(`/api/lists/${id}/items?status=todo`).then((res) => res.json())
-  return items.reverse()
+  const items = await fetch(`/api/lists/${id}/items?status=todo`)
+    .then((res) => res.json())
+    .then((items) => items.reverse())
+    
+  return items
 }
 
 /**
