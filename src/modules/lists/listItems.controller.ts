@@ -11,11 +11,9 @@ export const handler: NextApiHandler = async (req, res) => {
       const hasValidStatus = status === 'completed' || status === 'todo'
 
       if (status && !hasValidStatus) {
-        return res
-          .status(400)
-          .json({
-            message: 'Value for "status" must be either "completed" or "todo"',
-          })
+        return res.status(400).json({
+          message: 'Value for "status" must be either "completed" or "todo"',
+        })
       }
 
       const items = await ListService.getListItems(id, { status })

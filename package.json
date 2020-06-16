@@ -8,6 +8,7 @@
     "start": "next start",
     "type-check": "tsc",
     "test": "jest",
+    "format": "prettier ./src/** --write",
     "e2e": "start-server-and-test start 3000 e2e:run",
     "e2e:run": "yarn cypress run",
     "e2e:open": "yarn cypress open",
